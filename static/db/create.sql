@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 CREATE SCHEMA IF NOT EXISTS habits;
 
 CREATE TABLE IF NOT EXISTS habits.user_detail (
+=======
+# Create the database
+CREATE SCHEMA IF NOT EXISTS habits;
+
+CREATE TABLE habits.user_detail (
+>>>>>>> 447958f9fffb302a145f52b0d5b28564adb8a5cb
     user_detail_id SERIAL NOT NULL,
     user_detail_username VARCHAR(50) NOT NULL,
     user_detail_password VARCHAR(255) NOT NULL,
@@ -8,7 +15,11 @@ CREATE TABLE IF NOT EXISTS habits.user_detail (
     CONSTRAINT user_detail_username_uq UNIQUE (user_detail_username)
 );
 
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS habits.weight (
+=======
+CREATE TABLE habits.weight (
+>>>>>>> 447958f9fffb302a145f52b0d5b28564adb8a5cb
     weight_id SERIAL NOT NULL,
     weight_value INT NOT NULL CHECK (
         weight_value >= 0
@@ -20,7 +31,11 @@ CREATE TABLE IF NOT EXISTS habits.weight (
     CONSTRAINT weight_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 );
 
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS habits.workout (
+=======
+CREATE TABLE habits.workout (
+>>>>>>> 447958f9fffb302a145f52b0d5b28564adb8a5cb
     workout_id SERIAL NOT NULL,
     workout_name VARCHAR(50) NOT NULL,
     workout_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -32,7 +47,11 @@ CREATE TABLE IF NOT EXISTS habits.workout (
     CONSTRAINT workout_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 );
 
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS habits.diet (
+=======
+CREATE TABLE habits.diet (
+>>>>>>> 447958f9fffb302a145f52b0d5b28564adb8a5cb
     diet_id SERIAL NOT NULL,
     diet_name VARCHAR(50) NOT NULL,
     diet_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -45,7 +64,11 @@ CREATE TABLE IF NOT EXISTS habits.diet (
     CONSTRAINT diet_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 );
 
+<<<<<<< HEAD
 CREATE TABLE IF NOT EXISTS habits.sleep (
+=======
+CREATE TABLE habits.sleep (
+>>>>>>> 447958f9fffb302a145f52b0d5b28564adb8a5cb
     sleep_id SERIAL NOT NULL,
     sleep_duration INT NOT NULL,
     sleep_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

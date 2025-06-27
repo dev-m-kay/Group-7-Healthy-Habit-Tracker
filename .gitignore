@@ -1,0 +1,43 @@
+__pycache__/
+
+#Flask / Py
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*$py.class
+
+#Flask env
+.env
+instance/
+config.py
+
+#Virtual env
+venv/
+ENV/
+env/
+.venv/
+
+#SQ db files
+*.db
+*.sqlite3
+
+#Flask Debug
+*.log
+*.bak
+*.swp
+
+#Test/pytest
+.pytest_cache/
+test-results.xml
+
+#VSCode
+.vscode/
+.history/
+
+#Pycharm
+.idea/
+*.iml
+
+
+

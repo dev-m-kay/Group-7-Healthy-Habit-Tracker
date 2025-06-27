@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+# Inserts data into the database
+>>>>>>> 447958f9fffb302a145f52b0d5b28564adb8a5cb
 INSERT INTO habits.user_detail (user_detail_username, user_detail_password) VALUES
 ('john_doe', 'example123'),
 ('jane_doe', 'password456'),
