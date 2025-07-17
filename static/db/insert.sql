@@ -26,14 +26,18 @@ INSERT INTO
         workout_duration,
         workout_intensity,
         workout_type,
+        workout_log,
+        workout_rating,
         user_detail_id
     )
 VALUES (
         'Morning Run',
         '2023-10-01 07:00:00',
         30,
-        5,
+        7,
         'Cardio',
+        'Felt great, good pace',
+        8,
         1
     ),
     (
@@ -42,6 +46,8 @@ VALUES (
         45,
         3,
         'Abs',
+        'Relaxing session, focused on flexibility',
+        7,
         2
     ),
     (
@@ -50,14 +56,18 @@ VALUES (
         60,
         4,
         'Arms',
+        'Too easy, need to increase weights',
+        5,
         3
     ),
     (
         'Weightlifting',
         '2023-10-04 16:00:00',
         90,
-        6,
+        10,
         'Legs',
+        'Intense workout, pushed limits',
+        9,
         4
     );
 
@@ -65,30 +75,35 @@ INSERT INTO
     habits.diet (
         diet_name,
         diet_date,
+        diet_log,
         diet_rating,
         user_detail_id
     )
 VALUES (
         'Pizza',
         '2023-10-01 12:00:00',
+        'Very healthy today, had a balanced meal',
         8,
         1
     ),
     (
         'Steak',
         '2023-10-02 13:00:00',
-        9,
+        'Had a bad cheat day',
+        1,
         2
     ),
     (
         'Salad',
         '2023-10-03 14:00:00',
+        'Healthy and light',
         7,
         3
     ),
     (
         'Chicken',
         '2023-10-04 15:00:00',
+        'Healthy and filling',
         10,
         4
     );
@@ -97,30 +112,35 @@ INSERT INTO
     habits.sleep (
         sleep_duration,
         sleep_date,
+        sleep_log,
         sleep_rating,
         user_detail_id
     )
 VALUES (
         8,
         '2023-10-01 22:00:00',
+        'Slept well, woke up refreshed',
         8,
         1
     ),
     (
         9,
         '2023-10-02 23:00:00',
+        'Had a restless night, woke up tired',
         7,
         2
     ),
     (
         6,
         '2023-10-03 21:00:00',
+        'Slept okay, woke up a bit groggy',
         6,
         3
     ),
     (
         7,
         '2023-10-04 20:00:00',
+        'Slept well, felt rested in the morning',
         9,
         4
     );
