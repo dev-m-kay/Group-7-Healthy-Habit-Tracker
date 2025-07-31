@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Workout Page{% endblock %}
+
+{% block header%}Workout Tracker{%endblock%}
+
+{% block body %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Duration</th>
+                <th>Intensity</th>
+                <th>Type</th>
+                <th>Notes</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in workout_data %}
+            <tr>
+                <td>{{ entry[1] }}</td>
+                <td>{{ entry[2] }}</td>
+                <td>{{ entry[3] }}</td>
+                <td>{{ entry[4] }}</td>
+                <td>{{ entry[5] }}</td>
+                <td>{{ entry[6] }}</td>
+                <td>{{ entry[7] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

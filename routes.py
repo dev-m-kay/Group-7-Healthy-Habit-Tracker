@@ -16,12 +16,12 @@ def insert():
     conn.close()
     pass
 
-def get_diet():
+def get_data(table_name):
     conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
 
     cur = conn.cursor()
 
-    cur.execute("SELECT * FROM habits.diet")
+    cur.execute("SELECT * FROM {table}".format(table=table_name))
     rows = cur.fetchall()
 
     cur.close()
@@ -42,8 +42,13 @@ def index():
 
 @app.route("/diet", methods=["GET"])
 def diet():
-    diet_data = get_diet()
+    diet_data = get_data("habits.diet")
     return render_template("diet.html", diet_data=diet_data)
+
+@app.route("/workout", methods=["GET"])
+def workout():
+    workout_data = get_data("habits.workout")
+    return render_template("workout.html", workout_data=workout_data)
 
 @app.errorhandler(404)
 def page_not_found(e):
