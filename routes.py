@@ -32,18 +32,6 @@ def insert():
         pass
     return redirect("/")
 
-@app.route("/sleep")
-def sleep():
-    pass
-
-@app.route("/workout")
-def workout():
-    pass
-
-@app.route("/diet")
-def diet():
-    pass
-
 @app.route("/input")
 def input():
     return render_template("input.html")
