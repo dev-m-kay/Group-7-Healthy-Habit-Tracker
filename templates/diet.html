@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Diet Page{% endblock %}
+
+{% block header%}Diet Tracker{%endblock%}
+
+{% block body %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Notes</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in diet_data %}
+            <tr>
+                <td>{{ entry[1] }}</td>
+                <td>{{ entry[2] }}</td>
+                <td>{{ entry[3] }}</td>
+                <td>{{ entry[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
