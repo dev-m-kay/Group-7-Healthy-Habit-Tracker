@@ -2,7 +2,7 @@ import psycopg2
 from flask import Flask, render_template, request, redirect
 
 def insert():
-    conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres" ,password="password", port=5432)
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
 
     cur = conn.cursor()
 
@@ -16,6 +16,19 @@ def insert():
     conn.close()
     pass
 
+def get_diet():
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
+
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM habits.diet")
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return rows
+
 def delete():
     pass
 def create():
@@ -26,6 +39,11 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     return render_template("home.html")
+
+@app.route("/diet", methods=["GET"])
+def diet():
+    diet_data = get_diet()
+    return render_template("diet.html", diet_data=diet_data)
 
 @app.errorhandler(404)
 def page_not_found(e):
