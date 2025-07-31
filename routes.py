@@ -1,20 +1,6 @@
 import psycopg2
 from flask import Flask, render_template, request, redirect
 
-def insert():
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
-
-    cur = conn.cursor()
-
-    cur.execute(open("static/db/delete.sql", "r").read())
-    cur.execute(open("static/db/create.sql", "r").read())
-    cur.execute(open("static/db/insert.sql", "r").read())
-
-    conn.commit()
-
-    cur.close()
-    conn.close()
-    pass
 
 def get_data(table_name):
     conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
@@ -39,6 +25,29 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     return render_template("home.html")
+@app.route("/insert",methods = ["POST"])
+def insert():
+    if request.method == 'POST':
+        #insert into Database
+        pass
+    return redirect("/")
+
+@app.route("/sleep")
+def sleep():
+    pass
+
+@app.route("/workout")
+def workout():
+    pass
+
+@app.route("/diet")
+def diet():
+    pass
+
+@app.route("/input")
+def input():
+    return render_template("input.html")
+
 
 @app.route("/diet", methods=["GET"])
 def diet():
