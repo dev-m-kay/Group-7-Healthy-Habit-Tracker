@@ -11,3 +11,5 @@ Code milestone 1 release notes: Complete set up of backend database using Postgr
 # navigate to static/db/ to find and run the sql statements to build, insert, and/or delete the database
 
 Code Milestone 2 release notes: added basic flask functionality and implemented CI/CD workflow to GitHub
+
+Code Milestone 3 release notes: added testing functionality for diet, workout, and sleep. Deleted input.html and dead code in repo.
