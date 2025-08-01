@@ -72,15 +72,15 @@ def insertdiet():
         conn.close()
     return redirect("/diet")
 
-@app.route("/sleep")
-def sleep():
-    pass
-
 
 @app.route("/input")
 def input():
     return render_template("input.html")
 
+@app.route("/sleep", methods=["GET"])
+def sleep():
+    sleep_data = get_data("habits.sleep")
+    return render_template("sleep.html", sleep_data=sleep_data)
 
 @app.route("/diet", methods=["GET"])
 def diet():
