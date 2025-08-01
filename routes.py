@@ -114,6 +114,38 @@ def insertworkout():
         conn.close()
     return redirect("/workout")
 
+@app.route("/insertsleep",methods = ["POST"])
+def insertsleep():
+    if request.method == 'POST':
+        date = request.form.get('date')
+        duration = request.form.get('duration')
+        rating = request.form.get('rating')
+        notes = request.form.get('notes')
+        user = request.form.get('user')
+
+        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        cur = conn.cursor()
+
+        cur.execute("""INSERT INTO
+                            habits.sleep (
+                                sleep_duration,
+                                sleep_date,
+                                sleep_log,
+                                sleep_rating,
+                                user_detail_id
+                            )
+                        VALUES (
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s);
+""",(duration,date,notes,rating,user))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+    return redirect("/sleep")
 
 @app.route("/input")
 def input():
