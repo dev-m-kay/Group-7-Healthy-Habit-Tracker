@@ -147,9 +147,7 @@ def insertsleep():
         conn.close()
     return redirect("/sleep")
 
-@app.route("/input")
-def input():
-    return render_template("input.html")
+
 
 @app.route("/sleep", methods=["GET"])
 def sleep():
