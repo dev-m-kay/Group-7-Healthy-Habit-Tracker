@@ -72,6 +72,48 @@ def insertdiet():
         conn.close()
     return redirect("/diet")
 
+@app.route("/insertworkout",methods = ["POST"])
+def insertworkout():
+    if request.method == 'POST':
+        date = request.form.get('date')
+        name = request.form.get('name')
+        duration = request.form.get('duration')
+        intensity = request.form.get('intensity')
+        type = request.form.get('type')
+        rating = request.form.get('rating')
+        notes = request.form.get('notes')
+        user = request.form.get('user')
+
+        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        cur = conn.cursor()
+
+        cur.execute("""INSERT INTO
+                            habits.workout (
+                                workout_name,
+                                workout_date,
+                                workout_duration,
+                                workout_intensity,
+                                workout_type,
+                                workout_log,
+                                workout_rating,
+                                user_detail_id
+                            )
+                        VALUES (
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s);
+        """,(name,date,duration,intensity,type,notes,rating,user))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+    return redirect("/workout")
+
 
 @app.route("/input")
 def input():
