@@ -4,24 +4,27 @@
 {% block header %}Sleep Tracker{% endblock %}
 
 {% block body %}
-    <table>
-        <thead>
-            <tr>
-                <th>Duration (hrs)</th>
-                <th>Date</th>
-                <th>Notes</th>
-                <th>Rating</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in sleep_data %}
-            <tr>
-                <td>{{ entry[1] }}</td>
-                <td>{{ entry[2] }}</td>
-                <td>{{ entry[3] }}</td>
-                <td>{{ entry[4] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <form method="post" action="">
+        <input type="hidden" name="test_name" value="MilestoneTest">
+        <table>
+            <thead>
+                <tr>
+                    <th>Duration (hrs)</th>
+                    <th>Date</th>
+                    <th>Notes</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in sleep_data %}
+                <tr>
+                    <td>{{ entry[1] }}</td>
+                    <td>{{ entry[2] }}</td>
+                    <td>{{ entry[3] }}</td>
+                    <td>{{ entry[4] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
 {% endblock %}
