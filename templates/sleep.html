@@ -4,27 +4,38 @@
 {% block header %}Sleep Tracker{% endblock %}
 
 {% block body %}
-    <form method="post" action="">
-        <input type="hidden" name="test_name" value="MilestoneTest">
-        <table>
-            <thead>
-                <tr>
-                    <th>Duration (hrs)</th>
-                    <th>Date</th>
-                    <th>Notes</th>
-                    <th>Rating</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in sleep_data %}
-                <tr>
-                    <td>{{ entry[1] }}</td>
-                    <td>{{ entry[2] }}</td>
-                    <td>{{ entry[3] }}</td>
-                    <td>{{ entry[4] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </form>
+    <div id="container">
+        <form action="/insertsleep" method="post">
+            <input type="hidden" id="user" name="user" value="1">
+            <label for="date">Date:</label><br>
+            <input type="date" name="date" id="date" required><br>
+            <label for="duration">Duration (hrs):</label>
+            <input type="number" id="duration" name="duration" required><br>
+            <label for="rating">Rate your sleep (1-low, 10-high):</label><br>
+            <input type="number" name="rating" id="rating" min="1" max="10"><br>
+            <label for="notes">Additional notes:</label>
+            <input type="text" name="notes" id="notes">
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Duration (hrs)</th>
+                <th>Date</th>
+                <th>Notes</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in sleep_data %}
+            <tr>
+                <td>{{ entry[1] }}</td>
+                <td>{{ entry[2] }}</td>
+                <td>{{ entry[3] }}</td>
+                <td>{{ entry[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
