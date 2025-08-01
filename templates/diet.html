@@ -4,6 +4,20 @@
 {% block header%}Diet Tracker{%endblock%}
 
 {% block body %}
+    <div id = "container">
+        <form action="/insertdiet" method="post">
+            <input type="hidden" id ="user" name="user" value="1">
+            <label for="date">Date:</label><br>
+            <input type="date" name="date" id="date" required><br>
+            <label for="mealname">What did you eat?: </label>
+            <input type="text" id="mealname" name="mealname" required><br>
+            <label for ="rating">Rate the overall healthiness of your meals (1-low, 10-high):</label><br>
+            <input type="number" name="rating" id="rating" min="1" max="10"><br>
+            <label for="notes">Additional notes: </label>
+            <input type="text" name="notes" id="notes">
+            <input type="submit" value="Submit">
+        </form>
+    </div>
     <table>
         <thead>
             <tr>
