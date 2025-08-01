@@ -1,9 +1,29 @@
 {% extends "base.html" %}
 {% block title %}Workout Page{% endblock %}
 
-{% block header%}Workout Tracker{%endblock%}
+{% block header %}Workout Tracker{% endblock %}
 
 {% block body %}
+    <div id="container">
+        <form action="/insertworkout" method="post">
+            <input type="hidden" id="user" name="user" value="1">
+            <label for="date">Date:</label><br>
+            <input type="date" name="date" id="date" required><br>
+            <label for="name">Workout Name:</label>
+            <input type="text" id="name" name="name" required><br>
+            <label for="duration">Duration (min):</label>
+            <input type="number" id="duration" name="duration" required><br>
+            <label for="intensity">Intensity (1-10):</label><br>
+            <input type="number" name="intensity" id="intensity" min="1" max="10" required><br>
+            <label for="type">Type:</label>
+            <input type="text" name="type" id="type" required><br>
+            <label for="rating">Rate the workout (1-low, 10-high):</label><br>
+            <input type="number" name="rating" id="rating" min="1" max="10"><br>
+            <label for="notes">Additional notes:</label>
+            <input type="text" name="notes" id="notes">
+            <input type="submit" value="Submit">
+        </form>
+    </div>
     <table>
         <thead>
             <tr>
