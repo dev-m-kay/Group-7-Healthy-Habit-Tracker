@@ -1,9 +1,22 @@
 import psycopg2
 from flask import Flask, render_template, request, redirect
 
+conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+
+cur = conn.cursor()
+
+cur.execute(open("static/db/delete.sql", "r").read())
+cur.execute(open("static/db/create.sql", "r").read())
+cur.execute(open("static/db/insert.sql", "r").read())
+
+conn.commit()
+
+cur.close()
+conn.close()
+#initializes data for testing purposes, will be removed before final release
 
 def get_data(table_name):
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
+    conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres" ,password="password", port=5432)
 
     cur = conn.cursor()
 
@@ -20,29 +33,49 @@ def delete():
 def create():
     pass
 
+
+
 app = Flask(__name__)
 
 @app.route("/")
 def index():
     return render_template("home.html")
-@app.route("/insert",methods = ["POST"])
-def insert():
+@app.route("/insertdiet",methods = ["POST"])
+def insertdiet():
     if request.method == 'POST':
-        #insert into Database
-        pass
-    return redirect("/")
+        date = request.form.get('date')
+        user = request.form.get('user')
+        rating = request.form.get('rating')
+        mealname = request.form.get('mealname')
+        mealnotes=request.form.get('notes')
+
+        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        cur = conn.cursor()
+
+        cur.execute("""INSERT INTO habits.diet (
+                                diet_name,
+                                diet_date,
+                                diet_log,
+                                diet_rating,
+                                user_detail_id
+                            )
+                        VALUES (
+                                %s,
+                                %s,
+                                %s,
+                                %s,
+                                %s);
+        """,(mealname,date,mealnotes,rating,user))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+    return redirect("/diet")
 
 @app.route("/sleep")
 def sleep():
     pass
 
-@app.route("/workout")
-def workout():
-    pass
-
-@app.route("/diet")
-def diet():
-    pass
 
 @app.route("/input")
 def input():
