@@ -65,8 +65,87 @@ def load_user(user_id):
 @login_required
 def index():
     return render_template("home.html",user= current_user.username)
-@app.route("/insertdiet",methods = ["POST"])
-def insertdiet():
+
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM habits.users WHERE username = %s', (username,))
+        user_data = cur.fetchone()
+        conn.close()
+        if user_data and check_password_hash(user_data[2], password): #if a user was found password matches:
+            user = User(id=user_data[0], username=user_data[1], password_hash=user_data[2])
+            login_user(user)
+            return redirect('/')
+        else:
+            return render_template('login.html', error="Incorrect username or password")
+    return render_template('login.html')
+
+@app.route("/register", methods=["GET","POST"])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        password_hash = generate_password_hash(password)
+
+        # Check if the username already exists
+        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM habits.users WHERE username = %s', (username,))
+        existing_user = cur.fetchone() #check is user already exists
+        if existing_user:
+            return render_template('signup.html', error='Username taken!')
+
+        # Insert the new user into the database
+        cur.execute('INSERT INTO habits.users (username, password_hash) VALUES (%s, %s)', (username, password_hash))
+        conn.commit()
+        conn.close()
+
+        return redirect('/login')
+
+    return render_template('signup.html')
+
+@app.route("/sleep", methods=["GET"])
+@login_required
+def sleep():
+    if request.method == 'POST':
+        date = request.form.get('date')
+        duration = request.form.get('duration')
+        rating = request.form.get('rating')
+        notes = request.form.get('notes')
+        user = request.form.get('user')
+
+        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        cur = conn.cursor()
+
+        cur.execute("""INSERT INTO
+                                habits.sleep (
+                                    sleep_duration,
+                                    sleep_date,
+                                    sleep_log,
+                                    sleep_rating,
+                                    user_detail_id
+                                )
+                            VALUES (
+                                    %s,
+                                    %s,
+                                    %s,
+                                    %s,
+                                    %s);
+    """, (duration, date, notes, rating, user))
+        conn.commit()
+
+        cur.close()
+        conn.close()
+    sleep_data = get_data("habits.sleep")
+    return render_template("sleep.html", sleep_data=sleep_data, user= current_user.username)
+
+@app.route("/diet", methods=["GET", "POST"])
+@login_required
+def diet():
     if request.method == 'POST':
         date = request.form.get('date')
         user = request.form.get('user')
@@ -95,10 +174,13 @@ def insertdiet():
 
         cur.close()
         conn.close()
-    return redirect("/diet")
 
-@app.route("/insertworkout",methods = ["POST"])
-def insertworkout():
+    diet_data = get_data("habits.diet")
+    return render_template("diet.html", diet_data=diet_data, user= current_user.username)
+
+@app.route("/workout", methods=["GET"])
+@login_required
+def workout():
     if request.method == 'POST':
         date = request.form.get('date')
         name = request.form.get('name')
@@ -134,101 +216,9 @@ def insertworkout():
                                 %s);
         """,(name,date,duration,intensity,type,notes,rating,user))
         conn.commit()
-
         cur.close()
         conn.close()
-    return redirect("/workout")
 
-@app.route("/insertsleep",methods = ["POST"])
-def insertsleep():
-    if request.method == 'POST':
-        date = request.form.get('date')
-        duration = request.form.get('duration')
-        rating = request.form.get('rating')
-        notes = request.form.get('notes')
-        user = request.form.get('user')
-
-        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
-        cur = conn.cursor()
-
-        cur.execute("""INSERT INTO
-                            habits.sleep (
-                                sleep_duration,
-                                sleep_date,
-                                sleep_log,
-                                sleep_rating,
-                                user_detail_id
-                            )
-                        VALUES (
-                                %s,
-                                %s,
-                                %s,
-                                %s,
-                                %s);
-""",(duration,date,notes,rating,user))
-        conn.commit()
-
-        cur.close()
-        conn.close()
-    return redirect("/sleep")
-
-@app.route("/login", methods=["GET","POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
-        cur = conn.cursor()
-        cur.execute('SELECT * FROM habits.users WHERE username = %s', (username,))
-        user_data = cur.fetchone()
-        conn.close()
-        if user_data and check_password_hash(user_data[2], password):
-            user = User(id=user_data[0], username=user_data[1], password_hash=user_data[2])
-            login_user(user)
-            return redirect('/')
-        else:
-            return render_template('login.html', error="Incorrect username or password")
-    return render_template('login.html')
-
-@app.route("/register", methods=["GET","POST"])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        password_hash = generate_password_hash(password)
-
-        # Check if the username already exists
-        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
-        cur = conn.cursor()
-        cur.execute('SELECT * FROM habits.users WHERE username = %s', (username,))
-        existing_user = cur.fetchone()
-        if existing_user:
-            return render_template('signup.html', error='Username taken!')
-
-        # Insert the new user into the database
-        cur.execute('INSERT INTO habits.users (username, password_hash) VALUES (%s, %s)', (username, password_hash))
-        conn.commit()
-        conn.close()
-
-        return redirect('/login')
-
-    return render_template('signup.html')
-
-@app.route("/sleep", methods=["GET"])
-@login_required
-def sleep():
-    sleep_data = get_data("habits.sleep")
-    return render_template("sleep.html", sleep_data=sleep_data, user= current_user.username)
-
-@app.route("/diet", methods=["GET"])
-@login_required
-def diet():
-    diet_data = get_data("habits.diet")
-    return render_template("diet.html", diet_data=diet_data, user= current_user.username)
-
-@app.route("/workout", methods=["GET"])
-@login_required
-def workout():
     workout_data = get_data("habits.workout")
     return render_template("workout.html", workout_data=workout_data,user= current_user.username)
 
