@@ -64,3 +64,9 @@ CREATE TABLE habits.sleep (
     CONSTRAINT sleep_pkey PRIMARY KEY (sleep_id),
     CONSTRAINT sleep_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS habits.users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL
+);
