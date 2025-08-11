@@ -9,6 +9,13 @@
 		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename="css/styles.css")}}">
 	</head>
 	<body>
+
+		<div id="signedin">
+			{% if user %}
+			<p>Signed in as: {{user}}</p>
+			<a href="/logout">Sign Out</a>
+			{%endif%}
+		</div>
 		<nav>
 			<ul>
 				<li><a href="/">Home</a></li>
@@ -22,6 +29,9 @@
 
 		</header>
 		<main>
+			{% if error %}
+				<p class="error">{{ error }}</p>
+			{% endif %}
 			{% block body %}
 			{% endblock %}
 		</main>

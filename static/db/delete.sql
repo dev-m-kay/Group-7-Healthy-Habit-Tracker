@@ -8,4 +8,6 @@ DROP TABLE IF EXISTS habits.sleep;
 
 DROP TABLE IF EXISTS habits.user_detail;
 
+DROP TABLE IF EXISTS habits.users;
+
 DROP SCHEMA habits;

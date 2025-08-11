@@ -23,8 +23,14 @@ body
     border-radius: 15px;
 
 }
+#signedin{
+    text-align: right;
+    font-size: 1em;
+}
+.error {color: red;}
+
 nav{
-	font-family: Arial. sans-serif;
+	font-family: Arial, sans-serif;
 	font-size: 2em;
 	text-align: center;
 }

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>{%block title%}Healthy Habit Tracker Login{%endblock%}</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename="css/styles.css")}}">
+	</head>
+	<body>
+		<header>
+			<h1>Sign up for the Healthy Habit Tracker</h1>
+		</header>
+		<main>
+			{% if error %}
+				<p class="error">{{ error }}</p>
+			{% endif %}
+        <form action="/register" method="post">
+            <label for="username">Username:</label>
+            <input type="text" name="username" required />
+            <label for="password">Password:</label>
+            <input type="password" name="password" required />
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account?</p>
+        <a href="/login">Sign in</a>
+		</main>
+	</body>
+</html>
