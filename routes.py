@@ -27,7 +27,7 @@ def get_data(table_name):
 
     cur.close()
     conn.close()
-
+    print(rows)
     return rows
 
 def delete():
@@ -108,7 +108,7 @@ def register():
 
     return render_template('signup.html')
 
-@app.route("/sleep", methods=["GET"])
+@app.route("/sleep", methods=["GET","POST"])
 @login_required
 def sleep():
     if request.method == 'POST':
@@ -178,7 +178,7 @@ def diet():
     diet_data = get_data("habits.diet")
     return render_template("diet.html", diet_data=diet_data, user= current_user.username)
 
-@app.route("/workout", methods=["GET"])
+@app.route("/workout", methods=["GET","POST"])
 @login_required
 def workout():
     if request.method == 'POST':
