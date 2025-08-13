@@ -3,13 +3,12 @@ from flask import Flask, render_template, request, redirect
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
 
 cur = conn.cursor()
 
 cur.execute(open("static/db/delete.sql", "r").read())
 cur.execute(open("static/db/create.sql", "r").read())
-cur.execute(open("static/db/insert.sql", "r").read())
 
 conn.commit()
 
@@ -18,11 +17,11 @@ conn.close()
 #initializes data for testing purposes, will be removed before final release
 
 def get_data(table_name):
-    conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres" ,password="password", port=5432)
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
 
     cur = conn.cursor()
-
-    cur.execute("SELECT * FROM {table}".format(table=table_name))
+    query = "SELECT * FROM {table} WHERE user_detail_id = %s".format(table=table_name)
+    cur.execute(query, (current_user.id,))  # Use current_user.id to filter by logged-in user
     rows = cur.fetchall()
 
     cur.close()
@@ -45,15 +44,15 @@ login_manager.login_view = 'login'
 
 class User(UserMixin):
     def __init__(self, id, username, password_hash):
-        self.id = id
+        self.id = str(id)
         self.username = username
         self.password_hash = password_hash
 
 @login_manager.user_loader
 def load_user(user_id):
-    conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
     cur = conn.cursor()
-    cur.execute('SELECT * FROM habits.users WHERE id = %s', (user_id,))
+    cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_id = %s', (user_id,))
     user_data = cur.fetchone()
     conn.close()
 
@@ -71,13 +70,15 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+
+        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
         cur = conn.cursor()
-        cur.execute('SELECT * FROM habits.users WHERE username = %s', (username,))
+        cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
         user_data = cur.fetchone()
         conn.close()
         if user_data and check_password_hash(user_data[2], password): #if a user was found password matches:
             user = User(id=user_data[0], username=user_data[1], password_hash=user_data[2])
+            print(user)
             login_user(user)
             return redirect('/')
         else:
@@ -92,15 +93,15 @@ def register():
         password_hash = generate_password_hash(password)
 
         # Check if the username already exists
-        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
         cur = conn.cursor()
-        cur.execute('SELECT * FROM habits.users WHERE username = %s', (username,))
+        cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
         existing_user = cur.fetchone() #check is user already exists
         if existing_user:
             return render_template('signup.html', error='Username taken!')
 
         # Insert the new user into the database
-        cur.execute('INSERT INTO habits.users (username, password_hash) VALUES (%s, %s)', (username, password_hash))
+        cur.execute('INSERT INTO habits.user_detail (user_detail_username, user_detail_password) VALUES (%s, %s)', (username, password_hash))
         conn.commit()
         conn.close()
 
@@ -116,9 +117,10 @@ def sleep():
         duration = request.form.get('duration')
         rating = request.form.get('rating')
         notes = request.form.get('notes')
-        user = request.form.get('user')
 
-        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        user_id = current_user.get_id()
+
+        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO
@@ -135,7 +137,7 @@ def sleep():
                                     %s,
                                     %s,
                                     %s);
-    """, (duration, date, notes, rating, user))
+    """, (duration, date, notes, rating, user_id))
         conn.commit()
 
         cur.close()
@@ -148,12 +150,13 @@ def sleep():
 def diet():
     if request.method == 'POST':
         date = request.form.get('date')
-        user = request.form.get('user')
         rating = request.form.get('rating')
         mealname = request.form.get('mealname')
         mealnotes=request.form.get('notes')
 
-        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        user_id = current_user.get_id()
+
+        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO habits.diet (
@@ -169,7 +172,7 @@ def diet():
                                 %s,
                                 %s,
                                 %s);
-        """,(mealname,date,mealnotes,rating,user))
+        """,(mealname,date,mealnotes,rating,user_id))
         conn.commit()
 
         cur.close()
@@ -189,9 +192,10 @@ def workout():
         type = request.form.get('type')
         rating = request.form.get('rating')
         notes = request.form.get('notes')
-        user = request.form.get('user')
+        
+        user_id = current_user.get_id()
 
-        conn = psycopg2.connect(host="localhost", dbname="postgres", user="postgres", password="password", port=5432)
+        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO
@@ -214,7 +218,7 @@ def workout():
                                 %s,
                                 %s,
                                 %s);
-        """,(name,date,duration,intensity,type,notes,rating,user))
+        """,(name,date,duration,intensity,type,notes,rating,user_id))
         conn.commit()
         cur.close()
         conn.close()
