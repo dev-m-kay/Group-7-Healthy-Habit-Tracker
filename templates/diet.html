@@ -4,22 +4,43 @@
 
 {% block body %}
   <div class="bx">
-    <form action="/diet" method="post">
-      <label for="date">Date:</label>
-      <input type="date" name="date" id="date" required>
-      <label for="mealname">What did you eat?</label>
-      <input type="text" id="mealname" name="mealname" required>
-      <label for="rating">Rate the overall healthiness (1–10):</label>
-      <input type="number" name="rating" id="rating" min="1" max="10" step="1">
-      <label for="notes">Additional notes:</label>
-      <input type="text" name="notes" id="notes" placeholder="Optional notes">
-      <input type="submit" value="Submit">
+    <form action="/diet" method="post" novalidate>
+      <div class="fld">
+        <label class="lb" for="d_date">Date</label>
+        <svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3zm18 4H3v12h18z"/></svg>
+        <input class="inp" type="date" id="d_date" name="date" required>
+        <div class="btn-row">
+          <button class="btn-s" type="button" data-fill="today" data-target="d_date">Today</button>
+          <button class="btn-s" type="button" data-fill="yesterday" data-target="d_date">Yesterday</button>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lb" for="mealname">What did you eat?</label>
+        <input class="inp" type="text" id="mealname" name="mealname" required>
+        <div class="chips">
+          <button class="chip" type="button" data-fill="Breakfast" data-target="mealname">Breakfast</button>
+          <button class="chip" type="button" data-fill="Lunch"     data-target="mealname">Lunch</button>
+          <button class="chip" type="button" data-fill="Dinner"    data-target="mealname">Dinner</button>
+          <button class="chip" type="button" data-fill="Snack"     data-target="mealname">Snack</button>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lb" for="d_rate">Healthiness (1–10)</label>
+        <div class="range">
+          <input type="range" id="d_rate" name="rating" min="1" max="10" step="1" value="7">
+          <span class="bubble" id="d_rate_val">7</span>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lb" for="d_notes">Notes</label>
+        <input class="inp" type="text" id="d_notes" name="notes" placeholder="Optional notes">
+      </div>
+      <button class="btnp" type="submit">Save meal</button>
     </form>
   </div>
   <h2 class="ctr">Recent Diet Logs</h2>
   <div class="cards">
     {% for entry in diet_data %}
-      {# indices: 0:id, 1:name, 2:date, 3:notes, 4:rating #}
       {% set rating = entry[4] or 0 %}
       {% set badge = 'r-g' if rating|int >= 8 else ('r-o' if rating|int >= 5 else 'r-r') %}
       <article class="card">
@@ -28,14 +49,8 @@
           <span class="pill r-b {{ badge }}">Rating: {{ rating }}</span>
         </div>
         <div class="grid">
-          <div class="kpi">
-            <div class="k-l">Meal</div>
-            <div class="k-v">{{ entry[1] }}</div>
-          </div>
-          <div class="kpi">
-            <div class="k-l">Health (1–10)</div>
-            <div class="k-v">{{ rating or '—' }}</div>
-          </div>
+          <div class="kpi"><div class="k-l">Meal</div><div class="k-v">{{ entry[1] }}</div></div>
+          <div class="kpi"><div class="k-l">Health (1–10)</div><div class="k-v">{{ rating or '—' }}</div></div>
         </div>
         <div class="nts">
           <details>
@@ -46,5 +61,5 @@
       </article>
     {% endfor %}
   </div>
+  <script>bindRange('d_rate','d_rate_val');</script>
 {% endblock %}
-
