@@ -1,5 +1,128 @@
 {% extends "base.html" %}
 {% block title %}Sleep Page{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Styling for the chart containers */
+    .chart-container {
+      width: 80%;
+      margin: 30px auto;
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+
+    .bx {
+      background-color: #f0f0f0;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .bx label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .bx input[type="date"],
+    .bx input[type="number"],
+    .bx input[type="text"] {
+      width: calc(100% - 12px);
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .bx input[type="submit"] {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .bx input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+    .ctr {
+      text-align: center;
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    .card {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      padding: 15px;
+      width: 300px;
+    }
+    .card-hd {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .card .dt {
+      font-weight: bold;
+      color: #333;
+    }
+    .card .pill {
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.8em;
+      color: white;
+    }
+    .card .r-g { background-color: #28a745; } /* Green for good rating */
+    .card .r-o { background-color: #ffc107; color: #333; } /* Orange for medium rating */
+    .card .r-r { background-color: #dc3545; } /* Red for low rating */
+    .card .r-b { background-color: #007bff; } /* Blue for general */
+    .card .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .card .kpi {
+      text-align: center;
+      border: 1px solid #eee;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .card .k-l {
+      font-size: 0.9em;
+      color: #666;
+    }
+    .card .k-v {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .card .nts details {
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
+    .card .nts summary {
+      cursor: pointer;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .card .nts p {
+      margin-top: 10px;
+      color: #555;
+    }
+  </style>
+  {% endblock %}
+
 {% block header %}Sleep Tracker{% endblock %}
 
 {% block body %}
@@ -24,7 +147,7 @@
       {% set badge = 'r-g' if rating|int >= 8 else ('r-o' if rating|int >= 5 else 'r-r') %}
       <article class="card">
         <div class="card-hd">
-          <span class="dt">{{ entry[2] }}</span>
+          <span class="dt">{{ entry[2].strftime('%Y-%m-%d') }}</span> {# IMPORTANT: Formats date for consistent display #}
           <span class="pill r-b {{ badge }}">Rating: {{ rating }}</span>
         </div>
         <div class="grid">
@@ -46,5 +169,111 @@
       </article>
     {% endfor %}
   </div>
-{% endblock %}
 
+  <h2 class="ctr">Sleep Data Trends</h2>
+  <div class="chart-container">
+      <h3>Sleep Duration Over Time</h3>
+      <canvas id="sleepDurationChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+      <h3>Sleep Rating Over Time</h3>
+      <canvas id="sleepRatingChart"></canvas>
+  </div>
+
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          // Fetch sleep data from the Flask API endpoint
+          fetch('/api/sleep_data')
+          .then(response => response.json())
+          .then(data => {
+              const dates = data.dates;
+              const durations = data.durations;
+              const ratings = data.ratings;
+
+              // Chart for Sleep Duration Trend
+              const durationCtx = document.getElementById('sleepDurationChart').getContext('2d');
+              new Chart(durationCtx, {
+                  type: 'line', // Line chart for trends over time
+                  data: {
+                      labels: dates, // Dates on the X-axis
+                      datasets: [{
+                          label: 'Sleep Duration (hours)',
+                          data: durations, // Duration values on the Y-axis
+                          borderColor: 'rgb(75, 192, 192)', // Line color
+                          tension: 0.1, // Smoothness of the line
+                          fill: false // No fill under the line
+                      }]
+                  },
+                  options: {
+                      responsive: true, // Chart resizes with the container
+                      scales: {
+                          y: {
+                              beginAtZero: true, // Start Y-axis at 0
+                              title: {
+                                  display: true,
+                                  text: 'Duration (Hours)' // Y-axis title
+                              }
+                          },
+                          x: {
+                              title: {
+                                  display: true,
+                                  text: 'Date' // X-axis title
+                              }
+                          }
+                      },
+                      plugins: {
+                          title: {
+                              display: true,
+                              text: 'Your Sleep Duration Over Time' // Chart title
+                          }
+                      }
+                  }
+              });
+
+              // Chart for Sleep Rating Trend
+              const ratingCtx = document.getElementById('sleepRatingChart').getContext('2d');
+              new Chart(ratingCtx, {
+                  type: 'line', // Line chart for trends over time
+                  data: {
+                      labels: dates, // Dates on the X-axis
+                      datasets: [{
+                          label: 'Sleep Rating (1-10)',
+                          data: ratings, // Rating values on the Y-axis
+                          borderColor: 'rgb(255, 99, 132)', // Line color
+                          tension: 0.1, // Smoothness of the line
+                          fill: false // No fill under the line
+                      }]
+                  },
+                  options: {
+                      responsive: true, // Chart resizes with the container
+                      scales: {
+                          y: {
+                              beginAtZero: true, // Start Y-axis at 0
+                              max: 10, // Maximum rating value (from your form)
+                              title: {
+                                  display: true,
+                                  text: 'Rating (1-10)' // Y-axis title
+                              }
+                          },
+                          x: {
+                              title: {
+                                  display: true,
+                                  text: 'Date' // X-axis title
+                              }
+                          }
+                      },
+                      plugins: {
+                          title: {
+                              display: true,
+                              text: 'Your Sleep Rating Over Time' // Chart title
+                          }
+                      }
+                  }
+              });
+
+          })
+          .catch(error => console.error('Error fetching sleep data:', error));
+      });
+  </script>
+  {% endblock %}
