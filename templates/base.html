@@ -13,13 +13,10 @@
         }catch(e){}
       })();
     </script>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   </head>
   <body>
-
-    
     <div id="u-bar">
       {% if user %}
         <div class="u-cp">
@@ -33,7 +30,6 @@
       {% endif %}
       <button id="tTg" class="t-tg" type="button" aria-pressed="false" title="Toggle theme">Dark Theme / Light Theme</button>
     </div>
-
     <nav>
       <ul>
         <li><a href="/"        class="{% if request.path == '/' %}act{% endif %}">Home</a></li>
@@ -42,29 +38,66 @@
         <li><a href="/diet"    class="{% if request.path.startswith('/diet') %}act{% endif %}">Diet</a></li>
       </ul>
     </nav>
-
     <header>
       <h1>{% block header %}Healthy Habit Tracker{% endblock %}</h1>
     </header>
-
     <main>
       {% if error %}<p class="err">{{ error }}</p>{% endif %}
       {% block body %}{% endblock %}
     </main>
-
     <script>
       (function(){
         const btn = document.getElementById('tTg');
         if(!btn) return;
         const setMode = m => {
-          if(m==='dark'){ document.documentElement.setAttribute('data-theme','dark'); btn.setAttribute('aria-pressed','true'); }
-          else{ document.documentElement.removeAttribute('data-theme'); btn.setAttribute('aria-pressed','false'); }
+          if(m==='dark'){
+            document.documentElement.setAttribute('data-theme','dark');
+            btn.setAttribute('aria-pressed','true');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+            btn.setAttribute('aria-pressed','false');
+          }
           try{ localStorage.setItem('theme',m); }catch(e){}
         };
         const cur = document.documentElement.getAttribute('data-theme')==='dark' ? 'dark' : 'light';
         setMode(cur);
         btn.addEventListener('click',()=> setMode(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));
       })();
+    </script>
+    <script>
+      document.addEventListener('click', (e)=>{
+        if(e.target && e.target.matches('[data-toggle="pw"]')){
+          const inp = e.target.previousElementSibling;
+          if(!inp) return;
+          inp.type = (inp.type === 'password') ? 'text' : 'password';
+          e.target.textContent = (inp.type === 'password') ? 'Show' : 'Hide';
+        }
+      });
+      document.addEventListener('click', (e)=>{
+        const btn = e.target.closest('[data-fill]');
+        if(!btn) return;
+        const id = btn.getAttribute('data-target');
+        const el = id ? document.getElementById(id) : null;
+        if(!el) return;
+        const now = new Date();
+        if(btn.dataset.fill === 'today'){
+          el.valueAsDate = now;
+        } else if(btn.dataset.fill === 'yesterday'){
+          now.setDate(now.getDate()-1);
+          el.valueAsDate = now;
+        } else {
+          el.value = btn.dataset.fill;
+        }
+        el.dispatchEvent(new Event('input', {bubbles:true}));
+      });
+      function bindRange(idRange, idBubble){
+        const r = document.getElementById(idRange);
+        const b = document.getElementById(idBubble);
+        if(!r || !b) return;
+        const upd = ()=> b.textContent = r.value || '—';
+        r.addEventListener('input', upd);
+        upd();
+      }
     </script>
   </body>
 </html>
