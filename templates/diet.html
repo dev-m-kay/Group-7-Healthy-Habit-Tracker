@@ -38,6 +38,13 @@
       <button class="btnp" type="submit">Save meal</button>
     </form>
   </div>
+
+  <!-- Chart Section -->
+  <div class="chart-container" style="margin: 2rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+    <h3 class="ctr">Diet Health Rating Trends</h3>
+    <canvas id="dietChart" width="400" height="200"></canvas>
+  </div>
+
   <h2 class="ctr">Recent Diet Logs</h2>
   <div class="cards">
     {% for entry in diet_data %}
@@ -49,8 +56,14 @@
           <span class="pill r-b {{ badge }}">Rating: {{ rating }}</span>
         </div>
         <div class="grid">
-          <div class="kpi"><div class="k-l">Meal</div><div class="k-v">{{ entry[1] }}</div></div>
-          <div class="kpi"><div class="k-l">Health (1–10)</div><div class="k-v">{{ rating or '—' }}</div></div>
+          <div class="kpi">
+            <div class="k-l">Meal</div>
+            <div class="k-v">{{ entry[1] }}</div>
+          </div>
+          <div class="kpi">
+            <div class="k-l">Health (1–10)</div>
+            <div class="k-v">{{ rating or '–' }}</div>
+          </div>
         </div>
         <div class="nts">
           <details>
@@ -61,5 +74,59 @@
       </article>
     {% endfor %}
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script>
+    // Prepare data for Chart.js
+    const dietData = JSON.parse('{{ diet_chart_data | tojson | safe }}');
+    
+    const labels = dietData.map(entry => entry[0]); // dates
+    const ratings = dietData.map(entry => parseInt(entry[1]) || 0); // diet ratings
+    
+    const ctx = document.getElementById('dietChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Health Rating (1-10)',
+          data: ratings,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#f59e0b',
+          pointBorderColor: '#d97706',
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 10,
+            title: {
+              display: true,
+              text: 'Health Rating'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          }
+        }
+      }
+    });
+  </script>
   <script>bindRange('d_rate','d_rate_val');</script>
 {% endblock %}

@@ -58,6 +58,13 @@
       <button class="btnp" type="submit">Save workout</button>
     </form>
   </div>
+
+  <!-- Chart Section -->
+  <div class="chart-container" style="margin: 2rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+    <h3 class="ctr">Workout Duration Trends</h3>
+    <canvas id="workoutChart" width="400" height="200"></canvas>
+  </div>
+
   <h2 class="ctr">Recent Workout Logs</h2>
   <div class="cards">
     {% for entry in workout_data %}
@@ -83,5 +90,53 @@
       </article>
     {% endfor %}
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script>
+    // Prepare data for Chart.js
+    const workoutData = JSON.parse('{{ workout_chart_data | tojson | safe }}');
+    const labels = workoutData.map(entry => entry[0]); // dates
+    const durations = workoutData.map(entry => parseInt(entry[1])); // workout durations
+    
+    const ctx = document.getElementById('workoutChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Workout Duration (minutes)',
+          data: durations,
+          backgroundColor: 'rgba(34, 197, 94, 0.7)',
+          borderColor: '#22c55e',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Minutes'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          }
+        }
+      }
+    });
+  </script>
   <script>bindRange('w_rate','w_rate_val');</script>
+
 {% endblock %}
