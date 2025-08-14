@@ -1,5 +1,5 @@
 import psycopg2
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -20,7 +20,7 @@ def get_data(table_name):
     conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
 
     cur = conn.cursor()
-    query = "SELECT * FROM {table} WHERE user_detail_id = %s".format(table=table_name)
+    query = "SELECT * FROM {table} WHERE user_detail_id = %s ORDER BY {table}_date ASC".format(table=table_name)
     cur.execute(query, (current_user.id,))  # Use current_user.id to filter by logged-in user
     rows = cur.fetchall()
 
@@ -144,7 +144,29 @@ def sleep():
         conn.close()
     sleep_data = get_data("habits.sleep")
     return render_template("sleep.html", sleep_data=sleep_data, user= current_user.username)
+    
+# NEW API ENDPOINT FOR SLEEP DATA FOR CHARTING
+@app.route('/api/sleep_data')
+@login_required
+def get_sleep_data_for_charts():
+    user_id = current_user.id
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+    cur = conn.cursor()
+    cur.execute("SELECT sleep_date, sleep_duration, sleep_rating FROM habits.sleep WHERE user_detail_id = %s ORDER BY sleep_date ASC", (user_id,))
+    sleep_records = cur.fetchall()
+    conn.close()
 
+    # Format date as string for JavaScript
+    dates = [record[0].strftime('%Y-%m-%d') for record in sleep_records]
+    durations = [record[1] for record in sleep_records]
+    ratings = [record[2] for record in sleep_records]
+
+    return jsonify({
+        'dates': dates,
+        'durations': durations,
+        'ratings': ratings
+    })
+    
 @app.route("/diet", methods=["GET", "POST"])
 @login_required
 def diet():
