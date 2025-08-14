@@ -53,7 +53,7 @@ CREATE TABLE habits.diet (
 
 CREATE TABLE habits.sleep (
     sleep_id SERIAL NOT NULL,
-    sleep_duration INT NOT NULL,
+    sleep_duration DECIMAL NOT NULL,
     sleep_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sleep_log TEXT,
     sleep_rating INT NOT NULL CHECK (
@@ -63,4 +63,17 @@ CREATE TABLE habits.sleep (
     user_detail_id INT NOT NULL,
     CONSTRAINT sleep_pkey PRIMARY KEY (sleep_id),
     CONSTRAINT sleep_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
+);
+
+CREATE TABLE habits.goals(
+    goal_id SERIAL NOT NULL,
+    sleep_len_goal DECIMAL NOT NULL,
+    better_sleep INT NOT NULL CHECK (
+        better_sleep >= 1
+            AND better_sleep <= 10
+        ),
+    user_detail_id INT NOT NULL UNIQUE,
+    CONSTRAINT goals_pkey PRIMARY KEY (goal_id),
+    CONSTRAINT goals_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
+
 );

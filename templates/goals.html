@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Goal Page{% endblock %}
+{% block header %}Personal Goals{% endblock %}
+{% block body %}
+  <div class="bx">
+    <form action="/goals" method="post">
+        <label for="duration">How long do you want to sleep (hrs)?:</label>
+        <input type="number" id="duration" name="duration" min="0" step="0.1" placeholder="e.g., 7.5" required>
+        <label for="quality">I would like the quality to be at least: </label>
+        <input type="number" id="quality" name="quality" min="0" max = "10" step="1" required>
+        <label for="moreSleep">I want to sleep longer</label>
+        <input type="checkbox" id="moreSleep" name="moreSleep" value="1">
+        <input type="checkbox" id="betterSleep" name="betterSleep" value="1">
+        <label for="betterSleep">I want to improve my sleep quality</label>
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+{% endblock %}

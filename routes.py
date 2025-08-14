@@ -287,6 +287,7 @@ def workout():
         cur.close()
         conn.close()
 
+
     workout_data = get_data("workout")
     workout_chart_data = get_chart_data("workout", "workout_date", "workout_duration")
 
@@ -320,6 +321,33 @@ def goals():
     goal_data = get_data("goals")
     print(goal_data)
     return render_template("goals.html", user= current_user.username)
+
+@app.route('/goals', methods=['GET', 'POST'])
+@login_required
+def goals():
+    if request.method == 'POST':
+        moresleep = request.form.get('duration')
+        print("moresleep: "+moresleep)
+        bettersleep = request.form.get('quality')
+        print("bettersleep: "+bettersleep)
+        user_id = current_user.get_id()
+        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password",
+                                port=5432)
+        cur = conn.cursor()
+        cur.execute("""INSERT INTO habits.goals(sleep_len_goal, better_sleep, user_detail_id)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (user_detail_id) 
+                        DO UPDATE SET 
+                            sleep_len_goal = EXCLUDED.sleep_len_goal, 
+                            better_sleep = EXCLUDED.better_sleep""",(moresleep, bettersleep,user_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+                                    
+    goal_data=get_data("habits.goals")
+    print(goal_data)
+    return render_template("goals.html", user= current_user.username)
+
 
 @app.route('/logout')
 @login_required
