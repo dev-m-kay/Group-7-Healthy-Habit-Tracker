@@ -1,54 +1,56 @@
 {% extends "base.html" %}
-{% block title %}Create Account{% endblock %}
-{% block header %}Create Account{% endblock %}
+{% block title %}Sign up{% endblock %}
+{% block header %}Create your account{% endblock %}
 
 {% block body %}
   {% if error %}<p class="err">{{ error }}</p>{% endif %}
   <div class="bx">
-    <form action="/register" method="post" novalidate id="signupForm">
+    <form action="/register" method="post" autocomplete="off">
       <div class="fld">
         <label class="lb" for="username">Username</label>
-        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5a5 5 0 0 0 5 5m0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4Z"/>
-        </svg>
-        <input class="inp" type="text" id="username" name="username" required autocomplete="username">
+        <svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a5 5 0 1 0-5-5a5 5 0 0 0 5 5m0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4Z"/></svg>
+        <input class="inp" type="text" id="username" name="username" value="{{ username or '' }}" required minlength="3" maxlength="50">
       </div>
-      <div class="fld" id="pwField">
+      <div class="fld">
         <label class="lb" for="password">Password</label>
-        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="currentColor" d="M12 17a2 2 0 1 0-2-2a2 2 0 0 0 2 2m6-6h-1V9a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v7h16v-7a2 2 0 0 0-2-2M9 9a3 3 0 1 1 6 0v2H9Z"/>
-        </svg>
-        <input class="inp" type="password" id="password" name="password" required minlength="6" autocomplete="new-password" aria-describedby="pwHelp">
+        <svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17a2 2 0 1 0-2-2a2 2 0 0 0 2 2m6-6h-1V9a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v7h16v-7a2 2 0 0 0-2-2M9 9a3 3 0 1 1 6 0v2H9Z"/></svg>
+        <input class="inp" type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
         <span class="toggle" data-toggle="pw">Show</span>
-        <div class="help" id="pwHelp">At least 6 characters.</div>
+        <div class="help">At least 8 characters.</div>
       </div>
-      <div class="fld" id="cpwField">
-        <label class="lb" for="confirm">Confirm password</label>
-        <input class="inp" type="password" id="confirm" name="confirm" minlength="6" autocomplete="new-password">
-        <span class="toggle" data-toggle="pw">Show</span>
-        <div class="help">Must match the password above.</div>
+      <div class="fld" id="pw2_wrap">
+        <label class="lb" for="password2">Confirm password</label>
+        <svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17a2 2 0 1 0-2-2a2 2 0 0 0 2 2m6-6h-1V9a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v7h16v-7a2 2 0 0 0-2-2M9 9a3 3 0 1 1 6 0v2H9Z"/></svg>
+        <input class="inp" type="password" id="password2" name="password2" required minlength="8" autocomplete="new-password">
+        <div class="help" id="pw2_help"></div>
       </div>
       <div class="btn-row">
         <button class="btnp" type="submit">Create account</button>
-        <a class="b b-so" href="/login">Back to sign in</a>
+        <a class="b b-so" href="/login">Back to login</a>
       </div>
     </form>
   </div>
   <script>
     (function(){
-      const f  = document.getElementById('signupForm');
-      const pw = document.getElementById('password');
-      const cp = document.getElementById('confirm');
-      const cf = document.getElementById('cpwField');
-      function match(){
-        if (!cp.value) { cf.classList.remove('err'); return true; }
-        const ok = pw.value === cp.value;
-        cf.classList.toggle('err', !ok);
-        return ok;
+      const pw1 = document.getElementById('password');
+      const pw2 = document.getElementById('password2');
+      const help = document.getElementById('pw2_help');
+      if(!pw1 || !pw2) return;
+
+      function check(){
+        if(!pw2.value) { help.textContent = ''; return; }
+        if(pw1.value !== pw2.value){
+          help.textContent = 'Passwords do not match.';
+          help.style.color = 'var(--dng)';
+          pw2.setCustomValidity('Passwords do not match');
+        } else {
+          help.textContent = 'Passwords match.';
+          help.style.color = 'var(--pri)';
+          pw2.setCustomValidity('');
+        }
       }
-      pw.addEventListener('input', match);
-      cp.addEventListener('input', match);
-      f.addEventListener('submit', function(e){ if(!match()){ e.preventDefault(); cp.focus(); }});
+      pw1.addEventListener('input', check);
+      pw2.addEventListener('input', check);
     })();
   </script>
 {% endblock %}
