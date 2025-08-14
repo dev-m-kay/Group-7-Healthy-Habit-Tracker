@@ -1,5 +1,6 @@
+
 import psycopg2
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -16,37 +17,87 @@ cur.close()
 conn.close()
 #initializes data for testing purposes, will be removed before final release
 
+class User(UserMixin):
+    def __init__(self, id):
+        self.id = str(id)
+        self.username = self.get_username()
+
+    def get_id(self):
+        return self.id
+
+    def get_username(self):
+        try:
+            conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+            cur = conn.cursor()
+            cur.execute("SELECT user_detail_username FROM habits.user_detail WHERE user_detail_id = %s", (self.id,))
+            username = cur.fetchone()[0]
+            cur.close()
+            conn.close()
+            return username
+        except (Exception, psycopg2.Error) as error:
+            print(f"Error while getting username: {error}")
+            return None
+
 def get_data(table_name):
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres" ,password="password", port=5432)
-
+    """
+    Retrieves all data from a specified table for the current user.
+    
+    Args:
+        table_name (str): The name of the table to query (e.g., 'sleep', 'workout').
+    
+    Returns:
+        list: A list of tuples containing the queried data, or an empty list on error.
+    """
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
     cur = conn.cursor()
-    query = "SELECT * FROM {table} WHERE user_detail_id = %s ORDER BY {table}_date ASC".format(table=table_name)
-    cur.execute(query, (current_user.id,))  # Use current_user.id to filter by logged-in user
-    rows = cur.fetchall()
+    
+    # Corrected f-string to properly reference the table within the schema
+    query = f"SELECT * FROM habits.{table_name} WHERE user_detail_id = %s ORDER BY {table_name}_date DESC"
+    
+    try:
+        cur.execute(query, (current_user.id,))
+        rows = cur.fetchall()
+        return rows
+    except psycopg2.Error as e:
+        print(f"Database error in get_data for table '{table_name}': {e}")
+        return []
+    finally:
+        cur.close()
+        conn.close()
 
-    cur.close()
-    conn.close()
-    print(rows)
-    return rows
+def get_chart_data(table_name, date_column, value_column):
+    """
+    Retrieves data for a chart (date and a single value) from a specified table.
+    
+    Args:
+        table_name (str): The name of the table.
+        date_column (str): The name of the column containing the date.
+        value_column (str): The name of the column containing the value for the chart.
+    
+    Returns:
+        list: A list of tuples (date, value) sorted by date, or an empty list on error.
+    """
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+    cur = conn.cursor()
 
-def delete():
-    pass
-def create():
-    pass
-
-
+    query = f"SELECT {date_column}, {value_column} FROM habits.{table_name} WHERE user_detail_id = %s ORDER BY {date_column}"
+    
+    try:
+        cur.execute(query, (current_user.id,))
+        rows = cur.fetchall()
+        return rows
+    except psycopg2.Error as e:
+        print(f"Database error in get_chart_data for table '{table_name}': {e}")
+        return []
+    finally:
+        cur.close()
+        conn.close()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 #initialize Login Manager
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
-class User(UserMixin):
-    def __init__(self, id, username, password_hash):
-        self.id = str(id)
-        self.username = username
-        self.password_hash = password_hash
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -57,7 +108,8 @@ def load_user(user_id):
     conn.close()
 
     if user_data:
-        return User(id=user_data[0], username=user_data[1], password_hash=user_data[2])
+        # Pass only the ID to the User class
+        return User(id=user_data[0])
     return None
 
 @app.route("/")
@@ -76,8 +128,9 @@ def login():
         cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
         user_data = cur.fetchone()
         conn.close()
+
         if user_data and check_password_hash(user_data[2], password): #if a user was found password matches:
-            user = User(id=user_data[0], username=user_data[1], password_hash=user_data[2])
+            user = User(id=user_data[0])
             print(user)
             login_user(user)
             return redirect('/')
@@ -90,7 +143,7 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        password_hash = generate_password_hash(password)
+        password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
         # Check if the username already exists
         conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
@@ -98,6 +151,7 @@ def register():
         cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
         existing_user = cur.fetchone() #check is user already exists
         if existing_user:
+            conn.close()
             return render_template('signup.html', error='Username taken!')
 
         # Insert the new user into the database
@@ -124,49 +178,33 @@ def sleep():
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO
-                                habits.sleep (
-                                    sleep_duration,
-                                    sleep_date,
-                                    sleep_log,
-                                    sleep_rating,
-                                    user_detail_id
-                                )
-                            VALUES (
-                                    %s,
-                                    %s,
-                                    %s,
-                                    %s,
-                                    %s);
-    """, (duration, date, notes, rating, user_id))
+                                 habits.sleep (
+                                     sleep_duration,
+                                     sleep_date,
+                                     sleep_log,
+                                     sleep_rating,
+                                     user_detail_id
+                                 )
+                             VALUES (
+                                     %s,
+                                     %s,
+                                     %s,
+                                     %s,
+                                     %s);
+         """, (duration, date, notes, rating, user_id))
         conn.commit()
 
         cur.close()
         conn.close()
-    sleep_data = get_data("habits.sleep")
-    return render_template("sleep.html", sleep_data=sleep_data, user= current_user.username)
     
-# NEW API ENDPOINT FOR SLEEP DATA FOR CHARTING
-@app.route('/api/sleep_data')
-@login_required
-def get_sleep_data_for_charts():
-    user_id = current_user.id
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
-    cur = conn.cursor()
-    cur.execute("SELECT sleep_date, sleep_duration, sleep_rating FROM habits.sleep WHERE user_detail_id = %s ORDER BY sleep_date ASC", (user_id,))
-    sleep_records = cur.fetchall()
-    conn.close()
-
-    # Format date as string for JavaScript
-    dates = [record[0].strftime('%Y-%m-%d') for record in sleep_records]
-    durations = [record[1] for record in sleep_records]
-    ratings = [record[2] for record in sleep_records]
-
-    return jsonify({
-        'dates': dates,
-        'durations': durations,
-        'ratings': ratings
-    })
+    sleep_data = get_data("sleep")
+    sleep_chart_data = get_chart_data("sleep", "sleep_date", "sleep_duration")
     
+    return render_template("sleep.html", 
+                           sleep_data=sleep_data, 
+                           sleep_chart_data=sleep_chart_data,
+                           user=current_user.username)
+
 @app.route("/diet", methods=["GET", "POST"])
 @login_required
 def diet():
@@ -174,7 +212,7 @@ def diet():
         date = request.form.get('date')
         rating = request.form.get('rating')
         mealname = request.form.get('mealname')
-        mealnotes=request.form.get('notes')
+        mealnotes = request.form.get('notes')
 
         user_id = current_user.get_id()
 
@@ -182,26 +220,30 @@ def diet():
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO habits.diet (
-                                diet_name,
-                                diet_date,
-                                diet_log,
-                                diet_rating,
-                                user_detail_id
-                            )
-                        VALUES (
-                                %s,
-                                %s,
-                                %s,
-                                %s,
-                                %s);
-        """,(mealname,date,mealnotes,rating,user_id))
+                                 diet_name,
+                                 diet_date,
+                                 diet_log,
+                                 diet_rating,
+                                 user_detail_id
+                               )
+                         VALUES (
+                                 %s,
+                                 %s,
+                                 %s,
+                                 %s,
+                                 %s);
+         """,(mealname,date,mealnotes,rating,user_id))
         conn.commit()
 
         cur.close()
         conn.close()
 
-    diet_data = get_data("habits.diet")
-    return render_template("diet.html", diet_data=diet_data, user= current_user.username)
+    diet_data = get_data("diet")
+    diet_chart_data = get_chart_data("diet", "diet_date", "diet_rating")
+    return render_template("diet.html", 
+                           diet_data=diet_data,
+                           diet_chart_data=diet_chart_data,
+                           user=current_user.username)
 
 @app.route("/workout", methods=["GET","POST"])
 @login_required
@@ -221,32 +263,63 @@ def workout():
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO
-                            habits.workout (
-                                workout_name,
-                                workout_date,
-                                workout_duration,
-                                workout_intensity,
-                                workout_type,
-                                workout_log,
-                                workout_rating,
-                                user_detail_id
-                            )
-                        VALUES (
-                                %s,
-                                %s,
-                                %s,
-                                %s,
-                                %s,
-                                %s,
-                                %s,
-                                %s);
-        """,(name,date,duration,intensity,type,notes,rating,user_id))
+                                 habits.workout (
+                                     workout_name,
+                                     workout_date,
+                                     workout_duration,
+                                     workout_intensity,
+                                     workout_type,
+                                     workout_log,
+                                     workout_rating,
+                                     user_detail_id
+                                 )
+                             VALUES (
+                                     %s,
+                                     %s,
+                                     %s,
+                                     %s,
+                                     %s,
+                                     %s,
+                                     %s,
+                                     %s);
+         """,(name,date,duration,intensity,type,notes,rating,user_id))
         conn.commit()
         cur.close()
         conn.close()
 
-    workout_data = get_data("habits.workout")
-    return render_template("workout.html", workout_data=workout_data,user= current_user.username)
+    workout_data = get_data("workout")
+    workout_chart_data = get_chart_data("workout", "workout_date", "workout_duration")
+
+    return render_template("workout.html", 
+                           workout_data=workout_data,
+                           workout_chart_data=workout_chart_data,
+                           user=current_user.username)
+
+@app.route('/goals', methods=['GET', 'POST'])
+@login_required
+def goals():
+    if request.method == 'POST':
+        moresleep = request.form.get('duration')
+        print("moresleep: "+moresleep)
+        bettersleep = request.form.get('quality')
+        print("bettersleep: "+bettersleep)
+        user_id = current_user.get_id()
+        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password",
+                                 port=5432)
+        cur = conn.cursor()
+        cur.execute("""INSERT INTO habits.goals(sleep_len_goal, better_sleep, user_detail_id)
+                         VALUES (%s, %s, %s)
+                         ON CONFLICT (user_detail_id) 
+                         DO UPDATE SET 
+                             sleep_len_goal = EXCLUDED.sleep_len_goal, 
+                             better_sleep = EXCLUDED.better_sleep""",(moresleep, bettersleep,user_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+                                            
+    goal_data = get_data("goals")
+    print(goal_data)
+    return render_template("goals.html", user= current_user.username)
 
 @app.route('/logout')
 @login_required
@@ -262,4 +335,5 @@ def page_not_found(e):
     return render_template("500.html"),500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=11596)
+    app.run(host='0.0.0.0', port=11596, debug=True)
+
