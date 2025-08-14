@@ -495,3 +495,71 @@ input[type="submit"]:active{
   background:   #151D2E;
   border-color: #3A465E;
 }
+
+.card {
+  transition: transform .15s ease, box-shadow .15s ease, background-color .25s ease, border-color .25s ease, color .25s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(0,0,0,.08);
+}
+
+h1, h2 {
+  background: linear-gradient(90deg, var(--pri), var(--acc));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btnp:hover,
+input[type="submit"]:hover {
+  background: var(--pri7);
+  box-shadow: 0 4px 12px rgba(46, 139, 87, 0.30);
+}
+
+body,
+nav,
+.bx,
+.card,
+.kpi,
+.tbl,
+.t-tg,
+.u-cp,
+form {
+  transition: background-color .25s ease, color .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.kpi {
+  padding: 14px;
+  font-size: 1.05rem;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+.k-v {
+  font-size: 1.4rem;
+  color: var(--pri);
+}
+
+.tbl tbody tr:nth-child(odd) {
+  background: rgba(0,0,0,0.015);
+}
+.tbl tbody tr:hover {
+  background: rgba(122, 167, 255, 0.08);
+}
+
+:root[data-theme="dark"] .tbl tbody tr:nth-child(odd) {
+  background: rgba(255,255,255,0.03);
+}
+:root[data-theme="dark"] .tbl tbody tr:hover {
+  background: rgba(140,182,255,0.12);
+}
+
+form {
+  background: var(--sfc2);
+  padding: 16px;
+  border-radius: var(--rad);
+  box-shadow: var(--shd);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+:root[data-theme="dark"] form {
+  background: #0F1626;
+  border-color: #2B3445;
+}
