@@ -144,3 +144,44 @@ VALUES (
         9,
         4
     );
+INSERT INTO
+    habits.feedback (
+        user_detail_id,
+        feedback_type,
+        feedback_page,
+        feedback_message,
+        feedback_rating,
+        contact_email
+    )
+VALUES (
+        1,
+        'idea',
+        'home',
+        'Add a dashboard summary with weekly averages.',
+        5,
+        'john@example.com'
+    ),
+    (
+        2,
+        'bug',
+        'sleep',
+        'Sleep chart was stretching the page.',
+        3,
+        NULL
+    ),
+    (
+        3,
+        'praise',
+        'workout',
+        'Cards look clean after the CSS update!',
+        5,
+        'alice@example.com'
+    ),
+    (
+        4,
+        'idea',
+        'diet',
+        'Would love macros tracking per meal.',
+        4,
+        NULL
+    );
