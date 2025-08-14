@@ -20,7 +20,7 @@ conn.commit()
 
 cur.close()
 conn.close()
-
+# initializes data for testing purposes, will be removed before final release
 
 def get_data(table_name):
     conn = psycopg2.connect(
@@ -33,7 +33,7 @@ def get_data(table_name):
 
     cur = conn.cursor()
     query = "SELECT * FROM {table} WHERE user_detail_id = %s".format(table=table_name)
-    cur.execute(query, (current_user.id,))  
+    cur.execute(query, (current_user.id,))  # Use current_user.id to filter by logged-in user
     rows = cur.fetchall()
 
     cur.close()
@@ -79,6 +79,7 @@ def create():
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+# initialize Login Manager
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -128,7 +129,7 @@ def login():
         cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
         user_data = cur.fetchone()
         conn.close()
-        if user_data and check_password_hash(user_data[2], password):  
+        if user_data and check_password_hash(user_data[2], password):  # if a user was found and password matches
             user = User(id=user_data[0], username=user_data[1], password_hash=user_data[2])
             print(user)
             login_user(user)
@@ -140,11 +141,21 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = (request.form.get('username') or "").strip()
+        password = request.form.get('password') or ""
+        password2 = request.form.get('password2') or ""   
+
+        if not username or not password or not password2:
+            return render_template('signup.html', error='All fields are required.', username=username)
+
+        if password != password2:
+            return render_template('signup.html', error='Passwords do not match.', username=username)
+
+        if len(password) < 8:
+            return render_template('signup.html', error='Password must be at least 8 characters.', username=username)
+
         password_hash = generate_password_hash(password)
 
-        
         conn = psycopg2.connect(
             host="localhost",
             dbname="habit_tracker",
@@ -153,10 +164,12 @@ def register():
             port=5432
         )
         cur = conn.cursor()
-        cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
-        existing_user = cur.fetchone()  
+
+        cur.execute('SELECT 1 FROM habits.user_detail WHERE user_detail_username = %s', (username,))
+        existing_user = cur.fetchone()
         if existing_user:
-            return render_template('signup.html', error='Username taken!')
+            conn.close()
+            return render_template('signup.html', error='Username taken!', username=username)
 
         cur.execute(
             'INSERT INTO habits.user_detail (user_detail_username, user_detail_password) VALUES (%s, %s)',
@@ -164,9 +177,7 @@ def register():
         )
         conn.commit()
         conn.close()
-
         return redirect('/login')
-
     return render_template('signup.html')
 
 @app.route("/sleep", methods=["GET", "POST"])
@@ -264,7 +275,9 @@ def workout():
         type = request.form.get('type')
         rating = request.form.get('rating')
         notes = request.form.get('notes')
+
         user_id = current_user.get_id()
+
         conn = psycopg2.connect(
             host="localhost",
             dbname="habit_tracker",
@@ -306,11 +319,13 @@ def workout():
 @login_required
 def feedback():
     if request.method == "POST":
-        ftype  = (request.form.get("type") or "").strip().lower()   
-        fpage  = (request.form.get("page") or "").strip().lower()   
+        ftype  = (request.form.get("type") or "").strip().lower()   # bug | idea | praise
+        fpage  = (request.form.get("page") or "").strip().lower()   # home | sleep | workout | diet | other
         msg    = (request.form.get("message") or "").strip()
         rating = request.form.get("rating")
         email  = (request.form.get("email") or "").strip()
+
+        # coerce rating safely
         try:
             r_val = int(rating) if rating else None
             if r_val is not None and not (1 <= r_val <= 5):
@@ -342,6 +357,8 @@ def feedback():
         cur.close()
         conn.close()
         return redirect("/feedback")
+
+    # GET
     fb_rows = _get_feedback_for_user()
     return render_template("feedback.html", user=current_user.username, feedback_data=fb_rows)
 
