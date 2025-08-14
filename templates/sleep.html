@@ -16,6 +16,13 @@
       <input type="submit" value="Submit">
     </form>
   </div>
+
+  <!-- Chart Section -->
+  <div class="chart-container" style="margin: 2rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+    <h3 class="ctr">Sleep Duration Trends</h3>
+    <canvas id="sleepChart" width="400" height="200"></canvas>
+  </div>
+
   <h2 class="ctr">Recent Sleep Logs</h2>
   <div class="cards">
     {% for entry in sleep_data %}
@@ -34,7 +41,7 @@
           </div>
           <div class="kpi">
             <div class="k-l">Sleep Quality</div>
-            <div class="k-v">{{ rating or '—' }}</div>
+            <div class="k-v">{{ rating or '–' }}</div>
           </div>
         </div>
         <div class="nts">
@@ -46,5 +53,54 @@
       </article>
     {% endfor %}
   </div>
-{% endblock %}
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script>
+    // Prepare data for Chart.js
+    const sleepData = JSON.parse('{{ sleep_chart_data | tojson | safe }}');
+    
+    const labels = sleepData.map(entry => entry[0]); // dates
+    const durations = sleepData.map(entry => parseFloat(entry[1])); // sleep durations
+    
+    const ctx = document.getElementById('sleepChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Sleep Duration (hours)',
+          data: durations,
+          borderColor: '#4f46e5',
+          backgroundColor: 'rgba(79, 70, 229, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Hours'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Date'
+            }
+          }
+        }
+      }
+    });
+  </script>
+{% endblock %}
