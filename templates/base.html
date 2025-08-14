@@ -32,10 +32,11 @@
     </div>
     <nav>
       <ul>
-        <li><a href="/"        class="{% if request.path == '/' %}act{% endif %}">Home</a></li>
-        <li><a href="/sleep"   class="{% if request.path.startswith('/sleep') %}act{% endif %}">Sleep</a></li>
-        <li><a href="/workout" class="{% if request.path.startswith('/workout') %}act{% endif %}">Workout</a></li>
-        <li><a href="/diet"    class="{% if request.path.startswith('/diet') %}act{% endif %}">Diet</a></li>
+        <li><a href="/"         class="{% if request.path == '/' %}act{% endif %}">Home</a></li>
+        <li><a href="/sleep"    class="{% if request.path.startswith('/sleep') %}act{% endif %}">Sleep</a></li>
+        <li><a href="/workout"  class="{% if request.path.startswith('/workout') %}act{% endif %}">Workout</a></li>
+        <li><a href="/diet"     class="{% if request.path.startswith('/diet') %}act{% endif %}">Diet</a></li>
+        <li><a href="/feedback" class="{% if request.path.startswith('/feedback') %}act{% endif %}">Feedback</a></li>
       </ul>
     </nav>
     <header>
@@ -64,6 +65,7 @@
         btn.addEventListener('click',()=> setMode(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));
       })();
     </script>
+
     <script>
       document.addEventListener('click', (e)=>{
         if(e.target && e.target.matches('[data-toggle="pw"]')){
@@ -73,6 +75,7 @@
           e.target.textContent = (inp.type === 'password') ? 'Show' : 'Hide';
         }
       });
+
       document.addEventListener('click', (e)=>{
         const btn = e.target.closest('[data-fill]');
         if(!btn) return;
