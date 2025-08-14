@@ -1,28 +1,54 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
+{% block title %}Create Account{% endblock %}
+{% block header %}Create Account{% endblock %}
 
-<html>
-	<head>
-		<title>{%block title%}Healthy Habit Tracker Login{%endblock%}</title>
-		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename="css/styles.css")}}">
-	</head>
-	<body>
-		<header>
-			<h1>Sign up for the Healthy Habit Tracker</h1>
-		</header>
-		<main>
-			{% if error %}
-				<p class="error">{{ error }}</p>
-			{% endif %}
-        <form action="/register" method="post">
-            <label for="username">Username:</label>
-            <input type="text" name="username" required />
-            <label for="password">Password:</label>
-            <input type="password" name="password" required />
-            <button type="submit">Sign Up</button>
-        </form>
-        <p>Already have an account?</p>
-        <a href="/login">Sign in</a>
-		</main>
-	</body>
-</html>
+{% block body %}
+  {% if error %}<p class="err">{{ error }}</p>{% endif %}
+  <div class="bx">
+    <form action="/register" method="post" novalidate id="signupForm">
+      <div class="fld">
+        <label class="lb" for="username">Username</label>
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5a5 5 0 0 0 5 5m0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4Z"/>
+        </svg>
+        <input class="inp" type="text" id="username" name="username" required autocomplete="username">
+      </div>
+      <div class="fld" id="pwField">
+        <label class="lb" for="password">Password</label>
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M12 17a2 2 0 1 0-2-2a2 2 0 0 0 2 2m6-6h-1V9a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v7h16v-7a2 2 0 0 0-2-2M9 9a3 3 0 1 1 6 0v2H9Z"/>
+        </svg>
+        <input class="inp" type="password" id="password" name="password" required minlength="6" autocomplete="new-password" aria-describedby="pwHelp">
+        <span class="toggle" data-toggle="pw">Show</span>
+        <div class="help" id="pwHelp">At least 6 characters.</div>
+      </div>
+      <div class="fld" id="cpwField">
+        <label class="lb" for="confirm">Confirm password</label>
+        <input class="inp" type="password" id="confirm" name="confirm" minlength="6" autocomplete="new-password">
+        <span class="toggle" data-toggle="pw">Show</span>
+        <div class="help">Must match the password above.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btnp" type="submit">Create account</button>
+        <a class="b b-so" href="/login">Back to sign in</a>
+      </div>
+    </form>
+  </div>
+  <script>
+    (function(){
+      const f  = document.getElementById('signupForm');
+      const pw = document.getElementById('password');
+      const cp = document.getElementById('confirm');
+      const cf = document.getElementById('cpwField');
+      function match(){
+        if (!cp.value) { cf.classList.remove('err'); return true; }
+        const ok = pw.value === cp.value;
+        cf.classList.toggle('err', !ok);
+        return ok;
+      }
+      pw.addEventListener('input', match);
+      cp.addEventListener('input', match);
+      f.addEventListener('submit', function(e){ if(!match()){ e.preventDefault(); cp.focus(); }});
+    })();
+  </script>
+{% endblock %}
