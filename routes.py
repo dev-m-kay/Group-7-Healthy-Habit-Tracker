@@ -330,16 +330,20 @@ def goals():
         print("moresleep: "+moresleep)
         bettersleep = request.form.get('quality')
         print("bettersleep: "+bettersleep)
+        intensity = request.form.get('intense')
+        diet = request.form.get('diet')
         user_id = current_user.get_id()
         conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password",
                                 port=5432)
         cur = conn.cursor()
-        cur.execute("""INSERT INTO habits.goals(sleep_len_goal, better_sleep, user_detail_id)
-                        VALUES (%s, %s, %s)
+        cur.execute("""INSERT INTO habits.goals(sleep_len_goal, better_sleep, intensity, diet, user_detail_id)
+                        VALUES (%s, %s, %s, %s, %s)
                         ON CONFLICT (user_detail_id) 
                         DO UPDATE SET 
                             sleep_len_goal = EXCLUDED.sleep_len_goal, 
-                            better_sleep = EXCLUDED.better_sleep""",(moresleep, bettersleep,user_id))
+                            better_sleep = EXCLUDED.better_sleep,
+                            intensity=EXCLUDED.intensity,
+                            diet= EXCLUDED.diet""",(moresleep, bettersleep,intensity,diet,user_id))
         conn.commit()
         cur.close()
         conn.close()
