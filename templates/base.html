@@ -1,39 +1,70 @@
 <!DOCTYPE html>
-
 <html>
-	<head>
-		{% block head %}
-		<title>{%block title%}Healthy Habit Tracker{%endblock%}</title>
-		{% endblock %}
-		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename="css/styles.css")}}">
-	</head>
-	<body>
+  <head>
+    {% block head %}
+    <title>{% block title %}Healthy Habit Tracker{% endblock %}</title>
+    {% endblock %}
+    <meta charset="utf-8">
+    <script>
+      (function(){
+        try{
+          const s = localStorage.getItem('theme') || 'light';
+          if(s==='dark') document.documentElement.setAttribute('data-theme','dark');
+        }catch(e){}
+      })();
+    </script>
 
-		<div id="signedin">
-			{% if user %}
-			<p>Signed in as: {{user}}</p>
-			<a href="/logout">Sign Out</a>
-			{%endif%}
-		</div>
-		<nav>
-			<ul>
-				<li><a href="/">Home</a></li>
-				<li><a href="/sleep">Sleep</a></li>
-				<li><a href="/workout">Workout</a></li>
-				<li><a href="/diet">Diet</a></li>
-			</ul>
-		</nav>
-		<header>
-			<h1>{%block header%}page name{%endblock%}</h1>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+  <body>
 
-		</header>
-		<main>
-			{% if error %}
-				<p class="error">{{ error }}</p>
-			{% endif %}
-			{% block body %}
-			{% endblock %}
-		</main>
-	</body>
+    
+    <div id="u-bar">
+      {% if user %}
+        <div class="u-cp">
+          <span class="avt" aria-hidden="true">{{ user[:1]|upper }}</span>
+          <span class="m">
+            <span class="lbl">Signed in as</span>
+            <span class="nm">{{ user }}</span>
+          </span>
+          <a class="b b-so" href="/logout">Sign out</a>
+        </div>
+      {% endif %}
+      <button id="tTg" class="t-tg" type="button" aria-pressed="false" title="Toggle theme">Dark Theme / Light Theme</button>
+    </div>
+
+    <nav>
+      <ul>
+        <li><a href="/"        class="{% if request.path == '/' %}act{% endif %}">Home</a></li>
+        <li><a href="/sleep"   class="{% if request.path.startswith('/sleep') %}act{% endif %}">Sleep</a></li>
+        <li><a href="/workout" class="{% if request.path.startswith('/workout') %}act{% endif %}">Workout</a></li>
+        <li><a href="/diet"    class="{% if request.path.startswith('/diet') %}act{% endif %}">Diet</a></li>
+      </ul>
+    </nav>
+
+    <header>
+      <h1>{% block header %}Healthy Habit Tracker{% endblock %}</h1>
+    </header>
+
+    <main>
+      {% if error %}<p class="err">{{ error }}</p>{% endif %}
+      {% block body %}{% endblock %}
+    </main>
+
+    <script>
+      (function(){
+        const btn = document.getElementById('tTg');
+        if(!btn) return;
+        const setMode = m => {
+          if(m==='dark'){ document.documentElement.setAttribute('data-theme','dark'); btn.setAttribute('aria-pressed','true'); }
+          else{ document.documentElement.removeAttribute('data-theme'); btn.setAttribute('aria-pressed','false'); }
+          try{ localStorage.setItem('theme',m); }catch(e){}
+        };
+        const cur = document.documentElement.getAttribute('data-theme')==='dark' ? 'dark' : 'light';
+        setMode(cur);
+        btn.addEventListener('click',()=> setMode(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));
+      })();
+    </script>
+  </body>
 </html>

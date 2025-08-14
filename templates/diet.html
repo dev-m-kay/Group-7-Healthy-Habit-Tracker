@@ -1,40 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Diet Page{% endblock %}
-
-{% block header%}Diet Tracker{%endblock%}
+{% block header %}Diet Tracker{% endblock %}
 
 {% block body %}
-    <div id = "container">
-        <form action="/diet" method="post">
-            <label for="date">Date:</label><br>
-            <input type="date" name="date" id="date" required><br>
-            <label for="mealname">What did you eat?: </label>
-            <input type="text" id="mealname" name="mealname" required><br>
-            <label for ="rating">Rate the overall healthiness of your meals (1-low, 10-high):</label><br>
-            <input type="number" name="rating" id="rating" min="1" max="10"><br>
-            <label for="notes">Additional notes: </label>
-            <input type="text" name="notes" id="notes">
-            <input type="submit" value="Submit">
-        </form>
-    </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Notes</th>
-                <th>Rating</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in diet_data %}
-            <tr>
-                <td>{{ entry[1] }}</td>
-                <td>{{ entry[2] }}</td>
-                <td>{{ entry[3] }}</td>
-                <td>{{ entry[4] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <div class="bx">
+    <form action="/diet" method="post">
+      <label for="date">Date:</label>
+      <input type="date" name="date" id="date" required>
+      <label for="mealname">What did you eat?</label>
+      <input type="text" id="mealname" name="mealname" required>
+      <label for="rating">Rate the overall healthiness (1–10):</label>
+      <input type="number" name="rating" id="rating" min="1" max="10" step="1">
+      <label for="notes">Additional notes:</label>
+      <input type="text" name="notes" id="notes" placeholder="Optional notes">
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+  <h2 class="ctr">Recent Diet Logs</h2>
+  <div class="cards">
+    {% for entry in diet_data %}
+      {# indices: 0:id, 1:name, 2:date, 3:notes, 4:rating #}
+      {% set rating = entry[4] or 0 %}
+      {% set badge = 'r-g' if rating|int >= 8 else ('r-o' if rating|int >= 5 else 'r-r') %}
+      <article class="card">
+        <div class="card-hd">
+          <span class="dt">{{ entry[2] }}</span>
+          <span class="pill r-b {{ badge }}">Rating: {{ rating }}</span>
+        </div>
+        <div class="grid">
+          <div class="kpi">
+            <div class="k-l">Meal</div>
+            <div class="k-v">{{ entry[1] }}</div>
+          </div>
+          <div class="kpi">
+            <div class="k-l">Health (1–10)</div>
+            <div class="k-v">{{ rating or '—' }}</div>
+          </div>
+        </div>
+        <div class="nts">
+          <details>
+            <summary>Notes</summary>
+            <p>{{ entry[3] or 'No notes' }}</p>
+          </details>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
 {% endblock %}
+

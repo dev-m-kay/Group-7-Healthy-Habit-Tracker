@@ -1,52 +1,63 @@
 {% extends "base.html" %}
 {% block title %}Workout Page{% endblock %}
-
 {% block header %}Workout Tracker{% endblock %}
 
 {% block body %}
-    <div id="container">
-        <form action="/workout" method="post">
-            <label for="date">Date:</label><br>
-            <input type="date" name="date" id="date" required><br>
-            <label for="name">Workout Name:</label>
-            <input type="text" id="name" name="name" required><br>
-            <label for="duration">Duration (min):</label>
-            <input type="number" id="duration" name="duration" required><br>
-            <label for="intensity">Intensity (1-10):</label><br>
-            <input type="number" name="intensity" id="intensity" min="1" max="10" required><br>
-            <label for="type">Type:</label>
-            <input type="text" name="type" id="type" required><br>
-            <label for="rating">Rate the workout (1-low, 10-high):</label><br>
-            <input type="number" name="rating" id="rating" min="1" max="10"><br>
-            <label for="notes">Additional notes:</label>
-            <input type="text" name="notes" id="notes">
-            <input type="submit" value="Submit">
-        </form>
-    </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Date</th>
-                <th>Duration</th>
-                <th>Intensity</th>
-                <th>Type</th>
-                <th>Notes</th>
-                <th>Rating</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in workout_data %}
-            <tr>
-                <td>{{ entry[1] }}</td>
-                <td>{{ entry[2] }}</td>
-                <td>{{ entry[3] }}</td>
-                <td>{{ entry[4] }}</td>
-                <td>{{ entry[5] }}</td>
-                <td>{{ entry[6] }}</td>
-                <td>{{ entry[7] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <div class="bx">
+    <form action="/workout" method="post">
+      <label for="date">Date:</label>
+      <input type="date" name="date" id="date" required>
+      <label for="name">Workout Name:</label>
+      <input type="text" id="name" name="name" required>
+      <label for="duration">Duration (min):</label>
+      <input type="number" id="duration" name="duration" min="0" step="1" required>
+      <label for="intensity">Intensity (1–10):</label>
+      <input type="number" name="intensity" id="intensity" min="1" max="10" step="1" required>
+      <label for="type">Type:</label>
+      <input type="text" name="type" id="type" required>
+      <label for="rating">Rate the workout (1–10):</label>
+      <input type="number" name="rating" id="rating" min="1" max="10" step="1">
+      <label for="notes">Additional notes:</label>
+      <input type="text" name="notes" id="notes" placeholder="Optional notes">
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+  <h2 class="ctr">Recent Workout Logs</h2>
+  <div class="cards">
+    {% for entry in workout_data %}
+      {# indices: 0:id, 1:name, 2:date, 3:duration, 4:intensity, 5:type, 6:notes, 7:rating #}
+      {% set rating = entry[7] or 0 %}
+      {% set badge = 'r-g' if rating|int >= 8 else ('r-o' if rating|int >= 5 else 'r-r') %}
+      <article class="card">
+        <div class="card-hd">
+          <span class="dt">{{ entry[2] }}</span>
+          <span class="pill r-b {{ badge }}">Rating: {{ rating }}</span>
+        </div>
+        <div class="grid">
+          <div class="kpi">
+            <div class="k-l">Workout</div>
+            <div class="k-v">{{ entry[1] }}</div>
+          </div>
+          <div class="kpi">
+            <div class="k-l">Type</div>
+            <div class="k-v">{{ entry[5] }}</div>
+          </div>
+          <div class="kpi">
+            <div class="k-l">Duration (min)</div>
+            <div class="k-v">{{ entry[3] }}</div>
+          </div>
+          <div class="kpi">
+            <div class="k-l">Intensity (1–10)</div>
+            <div class="k-v">{{ entry[4] }}</div>
+          </div>
+        </div>
+        <div class="nts">
+          <details>
+            <summary>Notes</summary>
+            <p>{{ entry[6] or 'No notes' }}</p>
+          </details>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
 {% endblock %}
