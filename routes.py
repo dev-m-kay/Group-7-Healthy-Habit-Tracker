@@ -7,7 +7,7 @@ conn = psycopg2.connect(
     host="localhost",
     dbname="habit_tracker",
     user="postgres",
-    password="Edwartzamora2004.",
+    password="password",
     port=5432
 )
 
@@ -27,7 +27,7 @@ def get_data(table_name):
         host="localhost",
         dbname="habit_tracker",
         user="postgres",
-        password="Edwartzamora2004.",
+        password="password",
         port=5432
     )
 
@@ -46,7 +46,7 @@ def _get_feedback_for_user(limit=20):
         host="localhost",
         dbname="habit_tracker",
         user="postgres",
-        password="Edwartzamora2004.",
+        password="password",
         port=5432
     )
     cur = conn.cursor()
@@ -95,7 +95,7 @@ def load_user(user_id):
         host="localhost",
         dbname="habit_tracker",
         user="postgres",
-        password="Edwartzamora2004.",
+        password="password",
         port=5432
     )
     cur = conn.cursor()
@@ -122,7 +122,7 @@ def login():
             host="localhost",
             dbname="habit_tracker",
             user="postgres",
-            password="Edwartzamora2004.",
+            password="password",
             port=5432
         )
         cur = conn.cursor()
@@ -160,7 +160,7 @@ def register():
             host="localhost",
             dbname="habit_tracker",
             user="postgres",
-            password="Edwartzamora2004.",
+            password="password",
             port=5432
         )
         cur = conn.cursor()
@@ -195,7 +195,7 @@ def sleep():
             host="localhost",
             dbname="habit_tracker",
             user="postgres",
-            password="Edwartzamora2004.",
+            password="password",
             port=5432
         )
         cur = conn.cursor()
@@ -237,7 +237,7 @@ def diet():
             host="localhost",
             dbname="habit_tracker",
             user="postgres",
-            password="Edwartzamora2004.",
+            password="password",
             port=5432
         )
         cur = conn.cursor()
@@ -282,7 +282,7 @@ def workout():
             host="localhost",
             dbname="habit_tracker",
             user="postgres",
-            password="Edwartzamora2004.",
+            password="password",
             port=5432
         )
         cur = conn.cursor()
@@ -337,7 +337,7 @@ def feedback():
             host="localhost",
             dbname="habit_tracker",
             user="postgres",
-            password="Edwartzamora2004.",
+            password="password",
             port=5432
         )
         cur = conn.cursor()
