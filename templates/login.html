@@ -1,28 +1,29 @@
-<!DOCTYPE html>
-
-<html>
-	<head>
-		<title>{%block title%}Healthy Habit Tracker Login{%endblock%}</title>
-		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="{{url_for('static', filename="css/styles.css")}}">
-	</head>
-	<body>
-		<header>
-			<h1>Login</h1>
-		</header>
-		<main>
-			{% if error %}
-				<p class="error">{{ error }}</p>
-			{% endif %}
-        <form action="/login" method="post">
-            <label for="username">Username:</label>
-            <input type="text" name="username" required />
-            <label for="password">Password:</label>
-            <input type="password" name="password" required />
-            <button type="submit">Login</button>
-        </form>
-			<p>Don't have an account?</p>
-        	<a href="/register">Register</a>
-		</main>
-	</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block header %}Login{% endblock %}
+{% block body %}
+  {% if error %}<p class="err">{{ error }}</p>{% endif %}
+  <div class="bx">
+    <form action="/login" method="post" novalidate>
+      <div class="fld">
+        <label class="lb" for="username">Username</label>
+        <svg class="ic" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5a5 5 0 0 0 5 5m0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4Z"/>
+        </svg>
+        <input class="inp" type="text" id="username" name="username" required>
+      </div>
+      <div class="fld">
+        <label class="lb" for="password">Password</label>
+        <svg class="ic" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 17a2 2 0 1 0-2-2a2 2 0 0 0 2 2m6-6h-1V9a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v7h16v-7a2 2 0 0 0-2-2M9 9a3 3 0 1 1 6 0v2H9Z"/>
+        </svg>
+        <input class="inp" type="password" id="password" name="password" required>
+        <span class="toggle" data-toggle="pw">Show</span>
+      </div>
+      <div class="btn-row">
+        <button class="btnp" type="submit">Sign in</button>
+        <a href="/register" class="btnp">Create account</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

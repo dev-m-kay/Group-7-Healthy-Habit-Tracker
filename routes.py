@@ -4,7 +4,13 @@ from flask import Flask, render_template, request, redirect
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+conn = psycopg2.connect(
+    host="localhost",
+    dbname="habit_tracker",
+    user="postgres",
+    password="password",
+    port=5432
+)
 
 cur = conn.cursor()
 
@@ -15,7 +21,7 @@ conn.commit()
 
 cur.close()
 conn.close()
-#initializes data for testing purposes, will be removed before final release
+# initializes data for testing purposes, will be removed before final release
 
 class User(UserMixin):
     def __init__(self, id):
@@ -65,6 +71,40 @@ def get_data(table_name):
         cur.close()
         conn.close()
 
+def _get_feedback_for_user(limit=20):
+    conn = psycopg2.connect(
+        host="localhost",
+        dbname="habit_tracker",
+        user="postgres",
+        password="password",
+        port=5432
+    )
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT
+            feedback_id,
+            feedback_type,
+            feedback_page,
+            feedback_message,
+            COALESCE(feedback_rating, 0),
+            contact_email,
+            created_at
+        FROM habits.feedback
+        WHERE user_detail_id = %s
+        ORDER BY created_at DESC
+        LIMIT %s
+    """, (current_user.id, limit))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+def delete():
+    pass
+
+def create():
+    pass
+
 def get_chart_data(table_name, date_column, value_column):
     """
     Retrieves data for a chart (date and a single value) from a specified table.
@@ -95,13 +135,20 @@ def get_chart_data(table_name, date_column, value_column):
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
-#initialize Login Manager
+
+# initialize Login Manager
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+    conn = psycopg2.connect(
+        host="localhost",
+        dbname="habit_tracker",
+        user="postgres",
+        password="password",
+        port=5432
+    )
     cur = conn.cursor()
     cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_id = %s', (user_id,))
     user_data = cur.fetchone()
@@ -115,15 +162,21 @@ def load_user(user_id):
 @app.route("/")
 @login_required
 def index():
-    return render_template("home.html",user= current_user.username)
+    return render_template("home.html", user=current_user.username)
 
-@app.route("/login", methods=["GET","POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
 
-        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+        conn = psycopg2.connect(
+            host="localhost",
+            dbname="habit_tracker",
+            user="postgres",
+            password="password",
+            port=5432
+        )
         cur = conn.cursor()
         cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
         user_data = cur.fetchone()
@@ -131,6 +184,7 @@ def login():
 
         if user_data and check_password_hash(user_data[2], password): #if a user was found password matches:
             user = User(id=user_data[0])
+
             print(user)
             login_user(user)
             return redirect('/')
@@ -138,32 +192,39 @@ def login():
             return render_template('login.html', error="Incorrect username or password")
     return render_template('login.html')
 
-@app.route("/register", methods=["GET","POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
-        # Check if the username already exists
-        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+        conn = psycopg2.connect(
+            host="localhost",
+            dbname="habit_tracker",
+            user="postgres",
+            password="password",
+            port=5432
+        )
         cur = conn.cursor()
-        cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
-        existing_user = cur.fetchone() #check is user already exists
+
+        cur.execute('SELECT 1 FROM habits.user_detail WHERE user_detail_username = %s', (username,))
+        existing_user = cur.fetchone()
         if existing_user:
             conn.close()
+
             return render_template('signup.html', error='Username taken!')
 
-        # Insert the new user into the database
-        cur.execute('INSERT INTO habits.user_detail (user_detail_username, user_detail_password) VALUES (%s, %s)', (username, password_hash))
+        cur.execute(
+            'INSERT INTO habits.user_detail (user_detail_username, user_detail_password) VALUES (%s, %s)',
+            (username, password_hash)
+        )
         conn.commit()
         conn.close()
-
         return redirect('/login')
-
     return render_template('signup.html')
 
-@app.route("/sleep", methods=["GET","POST"])
+@app.route("/sleep", methods=["GET", "POST"])
 @login_required
 def sleep():
     if request.method == 'POST':
@@ -174,7 +235,13 @@ def sleep():
 
         user_id = current_user.get_id()
 
-        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+        conn = psycopg2.connect(
+            host="localhost",
+            dbname="habit_tracker",
+            user="postgres",
+            password="password",
+            port=5432
+        )
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO
@@ -216,7 +283,13 @@ def diet():
 
         user_id = current_user.get_id()
 
-        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+        conn = psycopg2.connect(
+            host="localhost",
+            dbname="habit_tracker",
+            user="postgres",
+            password="password",
+            port=5432
+        )
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO habits.diet (
@@ -245,7 +318,7 @@ def diet():
                            diet_chart_data=diet_chart_data,
                            user=current_user.username)
 
-@app.route("/workout", methods=["GET","POST"])
+@app.route("/workout", methods=["GET", "POST"])
 @login_required
 def workout():
     if request.method == 'POST':
@@ -256,10 +329,16 @@ def workout():
         type = request.form.get('type')
         rating = request.form.get('rating')
         notes = request.form.get('notes')
-        
+
         user_id = current_user.get_id()
 
-        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+        conn = psycopg2.connect(
+            host="localhost",
+            dbname="habit_tracker",
+            user="postgres",
+            password="password",
+            port=5432
+        )
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO
@@ -328,6 +407,52 @@ def goals():
     print(goal_data)
     return render_template("goals.html", user= current_user.username)
 
+@app.route("/feedback", methods=["GET", "POST"])
+@login_required
+def feedback():
+    if request.method == "POST":
+        ftype  = (request.form.get("type") or "").strip().lower()   # bug | idea | praise
+        fpage  = (request.form.get("page") or "").strip().lower()   # home | sleep | workout | diet | other
+        msg    = (request.form.get("message") or "").strip()
+        rating = request.form.get("rating")
+        email  = (request.form.get("email") or "").strip()
+
+        # coerce rating safely
+        try:
+            r_val = int(rating) if rating else None
+            if r_val is not None and not (1 <= r_val <= 5):
+                r_val = None
+        except ValueError:
+            r_val = None
+
+        conn = psycopg2.connect(
+            host="localhost",
+            dbname="habit_tracker",
+            user="postgres",
+            password="password",
+            port=5432
+        )
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO habits.feedback (
+                user_detail_id,
+                feedback_type,
+                feedback_page,
+                feedback_message,
+                feedback_rating,
+                contact_email
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s
+            )
+        """, (current_user.id, ftype, fpage, msg, r_val, email if email else None))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return redirect("/feedback")
+
+    # GET
+    fb_rows = _get_feedback_for_user()
+    return render_template("feedback.html", user=current_user.username, feedback_data=fb_rows)
 
 @app.route('/logout')
 @login_required
@@ -338,9 +463,10 @@ def logout():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
+
 @app.errorhandler(500)
 def page_not_found(e):
-    return render_template("500.html"),500
+    return render_template("500.html"), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=11596, debug=True)

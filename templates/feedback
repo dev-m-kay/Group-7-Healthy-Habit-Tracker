@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Feedback{% endblock %}
+{% block header %}Feedback{% endblock %}
+
+{% block body %}
+  {% if error %}<p class="err">{{ error }}</p>{% endif %}
+  <div class="bx">
+    <form action="/feedback" method="post" novalidate>
+      <div class="fld">
+        <label class="lb" for="type">Type</label>
+        <div class="seg">
+          <input type="radio" id="ft_bug"    name="type" value="bug" checked>
+          <label for="ft_bug">Bug</label>
+          <input type="radio" id="ft_idea"   name="type" value="idea">
+          <label for="ft_idea">Idea</label>
+          <input type="radio" id="ft_praise" name="type" value="praise">
+          <label for="ft_praise">Praise</label>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lb" for="page">Which page?</label>
+        <select class="inp" name="page" id="page" required>
+          <option value="home">Home</option>
+          <option value="sleep">Sleep</option>
+          <option value="workout">Workout</option>
+          <option value="diet">Diet</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label class="lb" for="message">Your feedback</label>
+        <textarea class="inp" id="message" name="message" rows="4" placeholder="Tell us what to fix or improve…" required></textarea>
+      </div>
+      <div class="fld">
+        <label class="lb" for="rating">Rating (1–5)</label>
+        <div class="range">
+          <input type="range" id="rating" name="rating" min="1" max="5" step="1" value="5">
+          <span class="bubble" id="fb_rating_val">5</span>
+        </div>
+      </div>
+      <div class="fld">
+        <label class="lb" for="email">Reply-to (optional)</label>
+        <input class="inp" type="email" id="email" name="email" placeholder="you@email.com">
+        <div class="help">If you want us to follow up.</div>
+      </div>
+      <div class="btn-row">
+        <button class="btnp" type="submit">Submit feedback</button>
+        <a class="b b-so" href="/">Back home</a>
+      </div>
+    </form>
+  </div>
+  <h2 class="ctr">Your recent feedback</h2>
+  <div class="cards">
+    {% for fb in feedback_data %}
+      {# order: id, type, page, message, rating, email, created_at #}
+      {% set t = fb[1] %}
+      {% set r = fb[4]|int %}
+      {% set badge = 'r-g' if r >= 4 else ('r-o' if r == 3 else 'r-r') %}
+      <article class="card">
+        <div class="card-hd">
+          <span class="dt">{{ fb[6] }}</span>
+          <span class="pill r-b {{ badge }}">★ {{ r }}</span>
+        </div>
+        <div class="grid">
+          <div class="kpi">
+            <div class="k-l">Type</div>
+            <div class="k-v">{{ t|capitalize }}</div>
+          </div>
+          <div class="kpi">
+            <div class="k-l">Page</div>
+            <div class="k-v">{{ fb[2]|capitalize }}</div>
+          </div>
+        </div>
+        <div class="nts">
+          <details open>
+            <summary>Message</summary>
+            <p>{{ fb[3] }}</p>
+            {% if fb[5] %}
+            <p class="mt8"><strong>Contact:</strong> {{ fb[5] }}</p>
+            {% endif %}
+          </details>
+        </div>
+      </article>
+    {% else %}
+      <p class="ctr mt16">No feedback yet. Be the first to submit!</p>
+    {% endfor %}
+  </div>
+
+  <script>bindRange('rating','fb_rating_val');</script>
+{% endblock %}

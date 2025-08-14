@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS habits.sleep (
     CONSTRAINT sleep_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 );
 
+
 CREATE TABLE IF NOT EXISTS habits.goals(
     goal_id SERIAL NOT NULL,
     sleep_len_goal DECIMAL NOT NULL,
@@ -85,3 +86,20 @@ CREATE TABLE IF NOT EXISTS habits.goals(
     CONSTRAINT goals_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 
 );
+
+CREATE TABLE habits.feedback (
+    feedback_id SERIAL NOT NULL,
+    feedback_type VARCHAR(50) NOT NULL,
+    feedback_page VARCHAR(50) NOT NULL,
+    feedback_message TEXT NOT NULL,
+    feedback_rating INT CHECK (
+        feedback_rating >= 1
+        AND feedback_rating <= 5
+    ),
+    contact_email VARCHAR(120),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    user_detail_id INT NOT NULL,
+    CONSTRAINT feedback_pkey PRIMARY KEY (feedback_id),
+    CONSTRAINT feedback_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
+);
+
