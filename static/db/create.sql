@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS habits.workout (
     CONSTRAINT workout_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 );
 
-CREATE TABLE habits.diet (
+CREATE TABLE IF NOT EXISTS habits.diet (
     diet_id SERIAL NOT NULL,
     diet_name VARCHAR(50) NOT NULL,
     diet_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -51,7 +51,7 @@ CREATE TABLE habits.diet (
     CONSTRAINT diet_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 );
 
-CREATE TABLE habits.sleep (
+CREATE TABLE IF NOT EXISTS habits.sleep (
     sleep_id SERIAL NOT NULL,
     sleep_duration DECIMAL NOT NULL,
     sleep_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -65,12 +65,20 @@ CREATE TABLE habits.sleep (
     CONSTRAINT sleep_user_detail_id_fkey FOREIGN KEY (user_detail_id) REFERENCES habits.user_detail (user_detail_id) ON DELETE CASCADE
 );
 
-CREATE TABLE habits.goals(
+CREATE TABLE IF NOT EXISTS habits.goals(
     goal_id SERIAL NOT NULL,
     sleep_len_goal DECIMAL NOT NULL,
     better_sleep INT NOT NULL CHECK (
         better_sleep >= 1
             AND better_sleep <= 10
+        ),
+    intensity INT NOT NULL CHECK (
+        intensity >= 1
+        AND intensity  <= 10
+        ),
+    diet INT NOT NULL CHECK(
+        diet >= 1
+        AND diet <= 10
         ),
     user_detail_id INT NOT NULL UNIQUE,
     CONSTRAINT goals_pkey PRIMARY KEY (goal_id),
