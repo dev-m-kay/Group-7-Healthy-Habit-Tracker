@@ -8,7 +8,7 @@ conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres
 
 cur = conn.cursor()
 
-cur.execute(open("static/db/delete.sql", "r").read())
+#cur.execute(open("static/db/delete.sql", "r").read())
 cur.execute(open("static/db/create.sql", "r").read())
 
 conn.commit()
@@ -92,6 +92,111 @@ def get_chart_data(table_name, date_column, value_column):
     finally:
         cur.close()
         conn.close()
+def get_goal_data():
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+    cur = conn.cursor()
+
+    # Corrected f-string to properly reference the table within the schema
+    query = f"SELECT * FROM habits.goals WHERE user_detail_id = %s"
+
+    try:
+        cur.execute(query, (current_user.id,))
+        rows = cur.fetchall()
+        return rows
+    except psycopg2.Error as e:
+        print(f"Database error in get_data for table 'goals': {e}")
+        return []
+    finally:
+        cur.close()
+        conn.close()
+
+def diet_tips(diet_data,goal_data):
+    tips=[]
+    if diet_data == [] or goal_data == []:
+        tips.append(f"Not enough data yet...")
+        return tips
+    diets = 0
+    diet_avg = 0
+    newest = diet_data[0][4]
+    goal = goal_data[0][4]
+    for diet in diet_data:
+        diet_avg += diet[4]
+        diets += 1
+    diet_avg = diet_avg / diets
+    if diet_avg >= goal:
+        tips.append(f"Your Average ({diet_avg:.2f}) currently meets or is passing your goal!")
+    else:
+        tips.append(f"Your Average ({diet_avg:.2f}) is currently below your goal!")
+    if newest >= goal:
+        tips.append(f"Your newest ({newest}) is above your goal! Keep it up!")
+    else:
+        tips.append(f"Your newest ({newest}) is below your goal! Don't let this become a trend.")
+    return tips
+
+def workout_tips(work_data,goal_data):
+    tips=[]
+    if work_data == [] or goal_data == []:
+        tips.append(f"Not enough data yet...")
+        return tips
+    works = 0
+    work_avg = 0
+    newest = work_data[0][4]
+    goal = goal_data[0][3]
+    for work in work_data:
+        work_avg += work[4]
+        works += 1
+    work_avg = work_avg / works
+    if work_avg >= goal:
+        tips.append(f"Your Average intensity ({work_avg:.2f}) currently meets or is passing your goal!")
+    else:
+        tips.append(f"Your Average intensity ({work_avg:.2f}) is currently below your goal!")
+        tips.append(f"If you're using weights, try increasing the weight or amount of reps.")
+    if newest >= goal:
+        tips.append(f"Your most recent intensity ({newest}) meets or is above your goal!")
+        if newest >= 8:
+            tips.append(f"Try not to go too intense too often; it's okay to take a break occasionally.")
+    else:
+        tips.append(f"Your newest ({newest}) is below your goal!")
+        tips.append(f"If you're taking a break that's okay, but try to increase the intensity when you're ready.")
+    return tips
+
+def sleep_tips(sleep_data,goal_data):
+    tips=[]
+    if sleep_data == [] or goal_data == []:
+        tips.append(f"Not enough data yet...")
+        return tips
+    sleeps = 0
+    sleep_len_avg = 0
+    sleep_qual_avg=0
+    newest_len = sleep_data[0][1]
+    newest_qual = sleep_data[0][4]
+    goal_len = goal_data[0][1]
+    goal_qual = goal_data[0][2]
+    for sleep in sleep_data:
+        sleep_len_avg += sleep[1]
+        sleep_qual_avg += sleep[4]
+        sleeps += 1
+    sleep_len_avg = sleep_len_avg / sleeps
+    sleep_qual_avg = sleep_qual_avg / sleeps
+    if sleep_len_avg >= goal_len:
+        tips.append(f"Your Average length of sleep ({sleep_len_avg:.2f}) currently meets or is passing your goal!")
+    else:
+        tips.append(f"Your Average length of sleep ({sleep_len_avg:.2f}) is currently below your goal!")
+    if newest_len >= goal_len:
+        tips.append(f"Your newest length of sleep ({newest_len}) is above your goal! Keep it up!")
+    else:
+        tips.append(f"Your newest length of sleep ({newest_len}) is below your goal! Don't let this become a trend.")
+    if sleep_qual_avg >= goal_qual:
+        tips.append(f"Your average quality of sleep({sleep_qual_avg:.2f}) is above your goal! Keep it up!")
+    else:
+        tips.append(f"Your average quality of sleep ({sleep_qual_avg:.2f}) is currently below your goal!")
+        tips.append(f"For better sleep quality, try not to use any screens for at least an hour before bed.")
+    if newest_qual >= goal_qual:
+        tips.append(f"Your most recent sleep ({newest_qual}) meets or is above your goal!")
+    else:
+        tips.append(f"Your most recent sleep ({newest_qual}) is below your goal!")
+    return tips
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -198,11 +303,16 @@ def sleep():
         conn.close()
     
     sleep_data = get_data("sleep")
+    print(sleep_data[0][1])
+    print(sleep_data)
+    goal_data = get_goal_data()
+    tips = sleep_tips(sleep_data, goal_data)
     sleep_chart_data = get_chart_data("sleep", "sleep_date", "sleep_duration")
     
     return render_template("sleep.html", 
                            sleep_data=sleep_data, 
                            sleep_chart_data=sleep_chart_data,
+                           tips = tips,
                            user=current_user.username)
 
 @app.route("/diet", methods=["GET", "POST"])
@@ -239,10 +349,16 @@ def diet():
         conn.close()
 
     diet_data = get_data("diet")
+    print(diet_data)
+    #print(type(diet_data[1][4]))
+    goals = get_goal_data()
+    print(goals)
+    tips = diet_tips(diet_data, goals)
     diet_chart_data = get_chart_data("diet", "diet_date", "diet_rating")
     return render_template("diet.html", 
                            diet_data=diet_data,
                            diet_chart_data=diet_chart_data,
+                           tips=tips,
                            user=current_user.username)
 
 @app.route("/workout", methods=["GET","POST"])
@@ -289,11 +405,15 @@ def workout():
 
 
     workout_data = get_data("workout")
+    print(workout_data)
+    goal_data = get_goal_data()
+    tips = workout_tips(workout_data,goal_data)
     workout_chart_data = get_chart_data("workout", "workout_date", "workout_duration")
 
     return render_template("workout.html", 
                            workout_data=workout_data,
                            workout_chart_data=workout_chart_data,
+                           tips=tips,
                            user=current_user.username)
 
 
@@ -303,9 +423,7 @@ def workout():
 def goals():
     if request.method == 'POST':
         moresleep = request.form.get('duration')
-        print("moresleep: "+moresleep)
         bettersleep = request.form.get('quality')
-        print("bettersleep: "+bettersleep)
         intensity = request.form.get('intense')
         diet = request.form.get('diet')
         user_id = current_user.get_id()
@@ -323,9 +441,7 @@ def goals():
         conn.commit()
         cur.close()
         conn.close()
-                                    
-    goal_data=get_data("habits.goals")
-    print(goal_data)
+    print(get_goal_data())
     return render_template("goals.html", user= current_user.username)
 
 
