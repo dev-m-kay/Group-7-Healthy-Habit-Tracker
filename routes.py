@@ -17,9 +17,6 @@ conn = get_db_connection()
 
 cur = conn.cursor()
 
-#cur.execute(open("static/db/delete.sql", "r").read())
-cur.execute(open("static/db/create.sql", "r").read())
-
 conn.commit()
 
 cur.close()
