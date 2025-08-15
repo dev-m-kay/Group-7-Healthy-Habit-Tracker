@@ -43,6 +43,12 @@
     </form>
   </div>
 
+  <div class="bx">
+      {% for tip in tips %}
+  <p>{{tip}}</p>
+  {% endfor %}
+  </div>
+
   <!-- Chart Section -->
   <div class="chart-container" style="margin: 2rem 0; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
     <h3 class="ctr">Sleep Duration Trends</h3>
