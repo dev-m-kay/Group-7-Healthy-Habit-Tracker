@@ -312,7 +312,6 @@ def login():
         if user_data and check_password_hash(user_data[2], password): #if a user was found password matches:
             user = User(id=user_data[0])
 
-            print(user)
             login_user(user)
             return redirect('/')
         else:
@@ -382,8 +381,6 @@ def sleep():
         conn.close()
     
     sleep_data = get_data("sleep")
-    print(sleep_data[0][1])
-    print(sleep_data)
     goal_data = get_goal_data()
     tips = sleep_tips(sleep_data, goal_data)
     sleep_chart_data = get_chart_data("sleep", "sleep_date", "sleep_duration")
@@ -429,10 +426,7 @@ def diet():
         conn.close()
 
     diet_data = get_data("diet")
-    print(diet_data)
-    #print(type(diet_data[1][4]))
     goals = get_goal_data()
-    print(goals)
     tips = diet_tips(diet_data, goals)
     diet_chart_data = get_chart_data("diet", "diet_date", "diet_rating")
     return render_template("diet.html", 
@@ -486,7 +480,6 @@ def workout():
 
 
     workout_data = get_data("workout")
-    print(workout_data)
     goal_data = get_goal_data()
     tips = workout_tips(workout_data,goal_data)
     workout_chart_data = get_chart_data("workout", "workout_date", "workout_duration")
@@ -522,7 +515,6 @@ def goals():
         conn.commit()
         cur.close()
         conn.close()
-    print(get_goal_data())
     return render_template("goals.html", user= current_user.username)
 
 @app.route("/feedback", methods=["GET", "POST"])
