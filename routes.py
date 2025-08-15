@@ -135,7 +135,7 @@ def get_goal_data():
     Returns:
         list: A list of a list containing the goal settings for the user.
     """
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+    conn = get_db_connection()
     cur = conn.cursor()
 
     # Corrected f-string to properly reference the table within the schema
@@ -284,13 +284,6 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     conn = get_db_connection()
     """Loads user info from database to allow login"""
-    conn = psycopg2.connect(
-        host="localhost",
-        dbname="habit_tracker",
-        user="postgres",
-        password="password",
-        port=5432
-    )
     cur = conn.cursor()
     cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_id = %s', (user_id,))
     user_data = cur.fetchone()
