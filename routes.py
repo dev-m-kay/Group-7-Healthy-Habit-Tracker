@@ -4,13 +4,16 @@ from flask import Flask, render_template, request, redirect
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
-conn = psycopg2.connect(
-    host="localhost",
-    dbname="habit_tracker",
-    user="postgres",
-    password="password",
-    port=5432
-)
+def get_db_connection():
+    return psycopg2.connect(
+        host="uno-habittracker.cxa4qcikgs1o.us-east-2.rds.amazonaws.com",
+        dbname="habit_tracker",
+        user="postgres",
+        password="WOpIwqP2g2EnD2m",
+        port=5432
+    )
+
+conn = get_db_connection()
 
 cur = conn.cursor()
 
@@ -33,7 +36,7 @@ class User(UserMixin):
 
     def get_username(self):
         try:
-            conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+            conn = get_db_connection()
             cur = conn.cursor()
             cur.execute("SELECT user_detail_username FROM habits.user_detail WHERE user_detail_id = %s", (self.id,))
             username = cur.fetchone()[0]
@@ -54,7 +57,7 @@ def get_data(table_name):
     Returns:
         list: A list of tuples containing the queried data, or an empty list on error.
     """
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+    conn = get_db_connection()
     cur = conn.cursor()
     
     # Corrected f-string to properly reference the table within the schema
@@ -72,13 +75,7 @@ def get_data(table_name):
         conn.close()
 
 def _get_feedback_for_user(limit=20):
-    conn = psycopg2.connect(
-        host="localhost",
-        dbname="habit_tracker",
-        user="postgres",
-        password="password",
-        port=5432
-    )
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
         SELECT
@@ -117,7 +114,7 @@ def get_chart_data(table_name, date_column, value_column):
     Returns:
         list: A list of tuples (date, value) sorted by date, or an empty list on error.
     """
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+    conn = get_db_connection()
     cur = conn.cursor()
 
     query = f"SELECT {date_column}, {value_column} FROM habits.{table_name} WHERE user_detail_id = %s ORDER BY {date_column}"
@@ -133,7 +130,7 @@ def get_chart_data(table_name, date_column, value_column):
         cur.close()
         conn.close()
 def get_goal_data():
-    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
+    conn = get_db_connection()
     cur = conn.cursor()
 
     # Corrected f-string to properly reference the table within the schema
@@ -247,13 +244,7 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    conn = psycopg2.connect(
-        host="localhost",
-        dbname="habit_tracker",
-        user="postgres",
-        password="password",
-        port=5432
-    )
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_id = %s', (user_id,))
     user_data = cur.fetchone()
@@ -275,13 +266,7 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        conn = psycopg2.connect(
-            host="localhost",
-            dbname="habit_tracker",
-            user="postgres",
-            password="password",
-            port=5432
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
         cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_username = %s', (username,))
         user_data = cur.fetchone()
@@ -304,13 +289,7 @@ def register():
         password = request.form['password']
         password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
-        conn = psycopg2.connect(
-            host="localhost",
-            dbname="habit_tracker",
-            user="postgres",
-            password="password",
-            port=5432
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
 
         cur.execute('SELECT 1 FROM habits.user_detail WHERE user_detail_username = %s', (username,))
@@ -340,13 +319,7 @@ def sleep():
 
         user_id = current_user.get_id()
 
-        conn = psycopg2.connect(
-            host="localhost",
-            dbname="habit_tracker",
-            user="postgres",
-            password="password",
-            port=5432
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO
@@ -393,13 +366,7 @@ def diet():
 
         user_id = current_user.get_id()
 
-        conn = psycopg2.connect(
-            host="localhost",
-            dbname="habit_tracker",
-            user="postgres",
-            password="password",
-            port=5432
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO habits.diet (
@@ -448,13 +415,7 @@ def workout():
 
         user_id = current_user.get_id()
 
-        conn = psycopg2.connect(
-            host="localhost",
-            dbname="habit_tracker",
-            user="postgres",
-            password="password",
-            port=5432
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
 
         cur.execute("""INSERT INTO
@@ -506,8 +467,7 @@ def goals():
         intensity = request.form.get('intense')
         diet = request.form.get('diet')
         user_id = current_user.get_id()
-        conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password",
-                                port=5432)
+        conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""INSERT INTO habits.goals(sleep_len_goal, better_sleep, intensity, diet, user_detail_id)
                         VALUES (%s, %s, %s, %s, %s)
@@ -541,13 +501,7 @@ def feedback():
         except ValueError:
             r_val = None
 
-        conn = psycopg2.connect(
-            host="localhost",
-            dbname="habit_tracker",
-            user="postgres",
-            password="password",
-            port=5432
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO habits.feedback (
