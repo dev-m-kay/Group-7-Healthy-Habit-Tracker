@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS habits.goals(
 
 );
 
-CREATE TABLE habits.feedback (
+CREATE TABLE IF NOT EXISTS habits.feedback (
     feedback_id SERIAL NOT NULL,
     feedback_type VARCHAR(50) NOT NULL,
     feedback_page VARCHAR(50) NOT NULL,
