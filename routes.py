@@ -24,7 +24,7 @@ conn.commit()
 
 cur.close()
 conn.close()
-# initializes data for testing purposes, will be removed before final release
+# initializes data for testing purposes
 
 class User(UserMixin):
     def __init__(self, id):
@@ -96,11 +96,6 @@ def _get_feedback_for_user(limit=20):
     conn.close()
     return rows
 
-def delete():
-    pass
-
-def create():
-    pass
 
 def get_chart_data(table_name, date_column, value_column):
     """
@@ -131,6 +126,16 @@ def get_chart_data(table_name, date_column, value_column):
         conn.close()
 def get_goal_data():
     conn = get_db_connection()
+    """
+    Retrieves goal data
+
+    Args:
+        None
+
+    Returns:
+        list: A list of a list containing the goal settings for the user.
+    """
+    conn = psycopg2.connect(host="localhost", dbname="habit_tracker", user="postgres", password="password", port=5432)
     cur = conn.cursor()
 
     # Corrected f-string to properly reference the table within the schema
@@ -148,6 +153,17 @@ def get_goal_data():
         conn.close()
 
 def diet_tips(diet_data,goal_data):
+    """
+    Takes in Diet and Goal Data and returns a list of tips
+    based on calculations made between the diet data and the goal data
+
+    Args:
+        diet_data (list): A list containing the diet data.
+        goal_data (list): A list containing the goal data
+
+    Returns:
+        list: A list of tips to be passed into the template and displayed on the webpage
+    """
     tips=[]
     if diet_data == [] or goal_data == []:
         tips.append(f"Not enough data yet...")
@@ -171,6 +187,17 @@ def diet_tips(diet_data,goal_data):
     return tips
 
 def workout_tips(work_data,goal_data):
+    """
+    Takes in workout and Goal Data and returns a list of tips
+    based on calculations made between the workout data and the goal data
+
+    Args:
+        work_data (list): A list containing the workout data.
+        goal_data (list): A list containing the goal data
+
+    Returns:
+        list: A list of tips to be passed into the template and displayed on the webpage
+    """
     tips=[]
     if work_data == [] or goal_data == []:
         tips.append(f"Not enough data yet...")
@@ -198,6 +225,17 @@ def workout_tips(work_data,goal_data):
     return tips
 
 def sleep_tips(sleep_data,goal_data):
+    """
+    Takes in sleep and Goal Data and returns a list of tips
+    based on calculations made between the diet data and the goal data
+
+    Args:
+        sleep_data (list): A list containing the sleep data.
+        goal_data (list): A list containing the goal data
+
+    Returns:
+        list: A list of tips to be passed into the template and displayed on the webpage
+    """
     tips=[]
     if sleep_data == [] or goal_data == []:
         tips.append(f"Not enough data yet...")
@@ -245,6 +283,14 @@ login_manager.login_view = 'login'
 @login_manager.user_loader
 def load_user(user_id):
     conn = get_db_connection()
+    """Loads user info from database to allow login"""
+    conn = psycopg2.connect(
+        host="localhost",
+        dbname="habit_tracker",
+        user="postgres",
+        password="password",
+        port=5432
+    )
     cur = conn.cursor()
     cur.execute('SELECT * FROM habits.user_detail WHERE user_detail_id = %s', (user_id,))
     user_data = cur.fetchone()
@@ -262,6 +308,7 @@ def index():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Route used to log users into website"""
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -284,6 +331,7 @@ def login():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """Route used to register new users"""
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -311,6 +359,7 @@ def register():
 @app.route("/sleep", methods=["GET", "POST"])
 @login_required
 def sleep():
+    """Route used to record sleep data"""
     if request.method == 'POST':
         date = request.form.get('date')
         duration = request.form.get('duration')
@@ -358,6 +407,7 @@ def sleep():
 @app.route("/diet", methods=["GET", "POST"])
 @login_required
 def diet():
+    """Route used to record diet data"""
     if request.method == 'POST':
         date = request.form.get('date')
         rating = request.form.get('rating')
@@ -404,6 +454,7 @@ def diet():
 @app.route("/workout", methods=["GET", "POST"])
 @login_required
 def workout():
+    """Route used to record workout data"""
     if request.method == 'POST':
         date = request.form.get('date')
         name = request.form.get('name')
@@ -461,6 +512,7 @@ def workout():
 @app.route('/goals', methods=['GET', 'POST'])
 @login_required
 def goals():
+    """Route used to record goals"""
     if request.method == 'POST':
         moresleep = request.form.get('duration')
         bettersleep = request.form.get('quality')
@@ -486,6 +538,7 @@ def goals():
 @app.route("/feedback", methods=["GET", "POST"])
 @login_required
 def feedback():
+    """Route used to provide feedback"""
     if request.method == "POST":
         ftype  = (request.form.get("type") or "").strip().lower()   # bug | idea | praise
         fpage  = (request.form.get("page") or "").strip().lower()   # home | sleep | workout | diet | other
@@ -527,15 +580,18 @@ def feedback():
 @app.route('/logout')
 @login_required
 def logout():
+    """Logs user out"""
     logout_user()
     return redirect('/login')
 
 @app.errorhandler(404)
 def page_not_found(e):
+    """Used when a page is requested that does not exist"""
     return render_template("404.html"), 404
 
 @app.errorhandler(500)
 def page_not_found(e):
+    """Used when a server-sided error occurs"""
     return render_template("500.html"), 500
 
 if __name__ == '__main__':

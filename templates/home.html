@@ -8,5 +8,7 @@
 {% block header%}Welcome to the Healthy Habit Tracker{%endblock%}
 
 {% block body %}
-<h2>This site is a work in progress</h2>
+
+	<h2>To get started, we recommend setting your <a href="/goals" class="{% if request.path.startswith('/goals') %}act{% endif %}">Goals</a> first!</h2>
+
 {% endblock %}
