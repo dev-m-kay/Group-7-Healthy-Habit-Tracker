@@ -14,4 +14,4 @@ Code Milestone 2 release notes: added basic flask functionality and implemented 
 
 Code Milestone 3 release notes: added testing functionality for diet, workout, and sleep. Deleted input.html and dead code in repo.
 
-Code Milestone 4 release notes: Added login/logout functionality, implemented graphs, overhauled CSS, implemented data analyzation and tip giving, aded feedback page.
+Code Milestone 4 release notes: Added login/logout functionality, implemented graphs, overhauled CSS, implemented data analyzation and tip giving, added feedback page.
