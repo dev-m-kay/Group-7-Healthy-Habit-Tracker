@@ -71,7 +71,8 @@ def get_data(table_name):
         cur.close()
         conn.close()
 
-def _get_feedback_for_user(limit=20):
+
+def _get_feedback_for_user(limit=20): 
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
